@@ -58,7 +58,7 @@ header .container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -101,10 +101,7 @@ header .container {
 .navigation .menu a.active {
     background: none; /* Elimina el fondo */
     color: var(--color-hover); /* Cambia el color del texto */
-    /* Opcional: Añadir subrayado */
-    /* text-decoration: underline; */
 }
-
 
 @media (max-width: 768px) {
     .menu-toggle {
@@ -349,18 +346,13 @@ header .container {
     display: flex;
     flex-wrap: wrap;
     gap: 40px;
-    justify-content: center;
+    justify-content: space-between; /* Ajustado para mejor distribución */
 }
 
-/* Nueva regla para que Valores ocupe toda la fila */
-.nosotros-item.valores {
-    flex: 1 1 100%;
-    max-width: 100%;
-}
-
+/* Ajustes para Misión y Visión */
 .nosotros-item {
     flex: 1 1 300px;
-    max-width: 350px;
+    max-width: 500px; /* Aumentado de 350px a 500px */
     background: #f9f9f9;
     padding: 30px;
     border-radius: 10px;
@@ -386,16 +378,22 @@ header .container {
 }
 
 .nosotros-item ul {
-    list-style: disc inside;
-    padding-left: 20px;
-    color: var(--color-texto);
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    text-align: left; /* Alinea la lista a la izquierda */
 }
 
-/* Estilos para la lista de Visión */
+.nosotros-item.valores {
+    flex: 1 1 100%;
+    max-width: 100%;
+}
+
 .vision-list {
     list-style: none;
-    padding: 0;
+    padding-left: 0;
     margin: 0;
+    text-align: left; /* Asegura que la lista no esté centrada */
 }
 
 .vision-list li {
@@ -406,6 +404,7 @@ header .container {
     position: relative;
     color: var(--color-texto);
     font-size: 1.1rem;
+    text-align: left; /* Asegura que el texto dentro de cada ítem esté alineado a la izquierda */
 }
 
 .vision-list li i {
@@ -465,15 +464,31 @@ header .container {
     color: var(--color-texto);
 }
 
+@media (min-width: 768px) {
+    .nosotros-item {
+        flex: 1 1 45%;
+        max-width: 500px;
+    }
+}
+
+@media (min-width: 992px) {
+    .nosotros-item {
+        flex: 1 1 45%;
+        max-width: 600px; /* Aumenta aún más el ancho máximo */
+    }
+}
+
+@media (min-width: 1200px) {
+    .nosotros-item {
+        flex: 1 1 40%;
+        max-width: 700px; /* Ancho máximo aún mayor */
+    }
+}
+
 @media (max-width: 768px) {
     .nosotros-container {
         flex-direction: column;
         align-items: center;
-    }
-
-    .nosotros-item.valores {
-        flex: 1 1 100%;
-        max-width: 100%;
     }
 
     .valores-list {
