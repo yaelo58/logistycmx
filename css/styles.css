@@ -93,17 +93,18 @@ header .container {
     font-weight: 500;
     padding: 10px 15px;
     border-radius: 5px;
-    transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+    transition: color 0.3s ease, transform 0.3s ease; /* Eliminado background de la transición */
 }
 
+/* Resaltar solo el texto en hover y activo */
 .navigation .menu a:hover,
 .navigation .menu a.active {
-    background: rgba(255, 255, 255, 0.2);
+    background: none; /* Elimina el fondo */
+    color: var(--color-hover); /* Cambia el color del texto */
+    /* Opcional: Añadir subrayado */
+    /* text-decoration: underline; */
 }
 
-.navigation .menu a.active {
-    background: var(--color-primario);
-}
 
 @media (max-width: 768px) {
     .menu-toggle {
