@@ -1,3 +1,5 @@
+/* css/styles.css */
+
 /* Variables CSS para colores y otros valores repetidos */
 :root {
     --color-primario: #C3962F;
@@ -621,13 +623,14 @@ img {
 
 /* Transiciones Suaves ya agrupadas en los elementos específicos */
 
-/* productos.js */
-.producto-item {
-    /* Ya definido en styles.css */
+.mensaje-error {
+    color: red;
+    font-weight: bold;
+    text-align: center;
 }
 
-/* Opcional: Estilos para el mensaje de carga */
-#loading-message {
-    font-size: 1.2rem;
-    color: var(--color-texto);
+.mensaje-info {
+    color: #555;
+    font-style: italic;
+    text-align: center;
 }

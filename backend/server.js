@@ -4,11 +4,28 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Middleware de seguridad
+app.use(helmet());
+
+// Configuración de CORS (ajusta el origen según tu entorno)
+app.use(cors({
+    origin: 'http://localhost:5500', // Cambia esto al dominio de tu frontend en producción
+}));
+
+// Middleware para limitar solicitudes
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // límite de 100 solicitudes por IP
+    message: 'Demasiadas solicitudes desde esta IP, por favor intenta de nuevo más tarde.'
+});
+app.use(limiter);
+
+// Middleware para parsear JSON
 app.use(express.json());
 
 // Rutas

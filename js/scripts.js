@@ -1,3 +1,5 @@
+// js/scripts.js
+
 document.addEventListener("DOMContentLoaded", () => {
     const menuToggle = document.querySelector(".menu-toggle");
     const navigation = document.querySelector(".navigation");
