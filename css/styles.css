@@ -620,3 +620,14 @@ img {
 }
 
 /* Transiciones Suaves ya agrupadas en los elementos específicos */
+
+/* productos.js */
+.producto-item {
+    /* Ya definido en styles.css */
+}
+
+/* Opcional: Estilos para el mensaje de carga */
+#loading-message {
+    font-size: 1.2rem;
+    color: var(--color-texto);
+}
