@@ -1,7 +1,4 @@
-// models/Producto.js
-
 const mongoose = require('mongoose');
-const validator = require('validator');
 
 const ProductoSchema = new mongoose.Schema({
     nombre: {
@@ -22,10 +19,7 @@ const ProductoSchema = new mongoose.Schema({
     imagen: {
         type: String,
         required: [true, 'La imagen es obligatoria'],
-        validate: {
-            validator: (v) => validator.isURL(v),
-            message: 'La imagen debe ser una URL válida'
-        }
+        match: [/^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/, 'La imagen debe ser una URL válida']
     }
 }, { timestamps: true });
 
