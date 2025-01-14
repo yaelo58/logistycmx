@@ -1,51 +1,71 @@
-// productos.js
+// backend/public/js/productos.js
 
 document.addEventListener("DOMContentLoaded", () => {
   const tablaProductosBody = document.getElementById('tabla-productos-body');
   const loadingMessage = document.getElementById('loading-message');
 
-  // Crear fila de producto
-  const crearFilaProducto = ({ _id, nombre, descripcion, precio, imagen }) => {
-    // Crea la fila
+  // Crear fila de producto con los nuevos campos
+  // Omitimos 'grupo' para no mostrarlo
+  const crearFilaProducto = ({ _id, codigo, descripcion, marca, modelo, precio, existencia, imagen }) => {
     const fila = document.createElement('tr');
 
-    // Crea las celdas de la fila
+    // Crear celdas
     const celdaImagen = document.createElement('td');
-    const celdaNombre = document.createElement('td');
+    const celdaCodigo = document.createElement('td');
+    const celdaMarca = document.createElement('td');
+    const celdaModelo = document.createElement('td');
     const celdaDescripcion = document.createElement('td');
     const celdaPrecio = document.createElement('td');
+    const celdaExistencia = document.createElement('td');
     const celdaDetalles = document.createElement('td');
 
-    // Configurar contenido de cada celda
-    celdaImagen.innerHTML = `<img src="${imagen}" alt="${nombre}" style="max-width: 100px; border-radius: 5px;">`;
-    celdaNombre.textContent = nombre;
+    // Contenido de cada celda
+    // Imagen
+    celdaImagen.innerHTML = `<img src="${imagen}" alt="${codigo}" style="max-width: 100px; border-radius: 5px;">`;
+
+    // Código
+    celdaCodigo.textContent = codigo;
+
+    // Marca
+    celdaMarca.textContent = marca;
+
+    // Modelo
+    celdaModelo.textContent = modelo;
+
+    // Descripción
     celdaDescripcion.textContent = descripcion;
+
+    // Precio (con decimales fijos)
     celdaPrecio.textContent = `$${precio.toFixed(2)}`;
 
-    // Agregar un enlace o botón para ver más detalles
+    // Existencia
+    celdaExistencia.textContent = existencia;
+
+    // Agregar un botón o enlace para más detalles
     const enlaceDetalle = document.createElement('a');
     enlaceDetalle.href = `detalle-producto.html?id=${_id}`;
     enlaceDetalle.classList.add('btn');
     enlaceDetalle.textContent = 'Ver Más';
-
     celdaDetalles.appendChild(enlaceDetalle);
 
     // Agregar las celdas a la fila
     fila.appendChild(celdaImagen);
-    fila.appendChild(celdaNombre);
+    fila.appendChild(celdaCodigo);
+    fila.appendChild(celdaMarca);
+    fila.appendChild(celdaModelo);
     fila.appendChild(celdaDescripcion);
     fila.appendChild(celdaPrecio);
+    fila.appendChild(celdaExistencia);
     fila.appendChild(celdaDetalles);
 
     return fila;
   };
 
-  // Mostrar mensaje (info o error)
+  // Mostrar mensaje en la tabla (por ejemplo, error o info)
   const mostrarMensaje = (mensaje, tipo = 'info') => {
     const mensajeElemento = document.createElement('p');
     mensajeElemento.textContent = mensaje;
     mensajeElemento.className = tipo === 'error' ? 'mensaje-error' : 'mensaje-info';
-    // Insertamos el mensaje en el tbody para que aparezca debajo de la tabla
     tablaProductosBody.appendChild(mensajeElemento);
   };
 
@@ -57,8 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
       }
       const productos = await respuesta.json();
-      
-      // Ocultamos el mensaje de carga
+
+      // Ocultar mensaje de "Cargando..."
       loadingMessage.style.display = 'none';
 
       if (productos.length === 0) {
@@ -79,5 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Ejecutar la carga de productos al cargar la página
   cargarProductos();
 });
