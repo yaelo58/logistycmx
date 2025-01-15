@@ -1,5 +1,3 @@
-// backend/models/Producto.js
-
 const mongoose = require('mongoose');
 
 const ProductoSchema = new mongoose.Schema(
@@ -10,7 +8,7 @@ const ProductoSchema = new mongoose.Schema(
       trim: true,
       index: true, // <-- Índice añadido
     },
-    codigo: { // <-- Cambiado de 'code' a 'codigo'
+    code: {
       type: String,
       required: [true, 'El código es obligatorio'],
       trim: true,
