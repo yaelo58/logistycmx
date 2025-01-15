@@ -1,5 +1,3 @@
-// backend/public/js/scripts.js
-
 document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.querySelector(".menu-toggle");
   const navigation = document.querySelector(".navigation");
@@ -10,8 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Función para alternar el menú móvil
   const toggleMenu = () => {
-    const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
-    menuToggle.setAttribute("aria-expanded", !isExpanded);
     navigation.classList.toggle("active");
   };
 

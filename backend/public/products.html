@@ -1,11 +1,9 @@
-<!-- backend/public/productos.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="description" content="Catálogo de autopartes de Logistycmx">
-  <meta name="keywords" content="autopartes, repuestos, coches, automóviles, accesorios">
   <meta name="author" content="Logistycmx">
   <title>Logistycmx | Productos</title>
   <!-- CSS y Favicon -->
@@ -32,18 +30,13 @@
       <a href="index.html" class="logo">
         <img src="img/logo.png" alt="Logo Logistycmx">
       </a>
-      <button
-        class="menu-toggle"
-        aria-label="Abrir menú"
-        aria-expanded="false"
-        aria-controls="primary-navigation"
-      >
+      <button class="menu-toggle">
         <i class="fas fa-bars"></i>
       </button>
-      <nav id="primary-navigation" class="navigation" role="navigation">
+      <nav id="primary-navigation" class="navigation">
         <ul class="menu">
           <li><a href="index.html#inicio" class="nav-link">Inicio</a></li>
-          <li><a href="productos.html" class="nav-link active">Productos</a></li>
+          <li><a href="products.html" class="nav-link active">Productos</a></li>
           <li><a href="index.html#nosotros" class="nav-link">Nosotros</a></li>
           <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
         </ul>
@@ -63,14 +56,12 @@
           <!-- Mensaje de carga -->
           <p id="loading-message">Cargando productos...</p>
 
-          <!-- Tabla con los nuevos encabezados -->
+          <!-- Tabla con nuevos encabezados (solo 5 columnas + detalles) -->
           <table id="tabla-productos" class="tabla-productos">
             <thead>
               <tr>
                 <th>Imagen</th>
                 <th>Código</th>
-                <th>Marca</th>
-                <th>Modelo</th>
                 <th>Descripción</th>
                 <th>Precio</th>
                 <th>Existencia</th>
@@ -81,7 +72,6 @@
               <!-- Filas dinámicas de productos -->
             </tbody>
           </table>
-
         </div>
         
         <div class="productos-button">
@@ -98,16 +88,16 @@
     <div class="container">
       <p>&copy; 2025 Logistycmx. Todos los derechos reservados.</p>
       <div class="social-media">
-        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-linkedin-in"></i></a>
       </div>
     </div>
   </footer>
 
   <!-- JavaScript -->
   <script src="js/scripts.js" defer></script>
-  <script src="js/productos.js" defer></script>
+  <script src="js/products.js" defer></script>
 </body>
 </html>

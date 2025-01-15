@@ -37,22 +37,18 @@ app.use(
   })
 );
 
-// Configuración de CORS (ajusta el origin para producción)
-app.use(
-  cors({
-    origin: '*'
-  })
-);
+// Configuración de CORS
+app.use(cors({ origin: '*' }));
 
 // Middleware para parsear JSON
 app.use(express.json());
 
-// Servir archivos estáticos desde la carpeta 'public'
+// Servir archivos estáticos desde 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Rutas de la API
-const productosRuta = require('./routes/productos');
-app.use('/api/productos', productosRuta);
+const productsRoute = require('./routes/products');
+app.use('/api/products', productsRoute);
 
 // Manejar rutas no encontradas (404)
 app.use((req, res) => {
@@ -66,7 +62,7 @@ app.use((err, req, res, next) => {
 });
 
 // Conectar a MongoDB y arrancar el servidor
-const iniciarServidor = async () => {
+const startServer = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Conectado a MongoDB');
@@ -81,4 +77,4 @@ const iniciarServidor = async () => {
   }
 };
 
-iniciarServidor();
+startServer();
