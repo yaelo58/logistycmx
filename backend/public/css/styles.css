@@ -527,7 +527,7 @@ color: var(--color-primario);
 margin-bottom: 20px;
 }
 
-.contact-item address {
+contact-item address {
 font-style: normal;
 margin-bottom: 15px;
 color: var(--color-texto);
@@ -569,6 +569,7 @@ iframe {
 /******************************************************************************
 4. FOOTER
 ******************************************************************************/
+
 footer {
 background: var(--color-footer);
 color: #fff;
@@ -673,4 +674,44 @@ position: relative;
 float: right;
 margin-bottom: 10px;
 cursor: pointer;
+}
+
+/* --- GRID para presentar los atributos de forma ordenada --- */
+.detalle-producto-grid {
+display: grid;
+grid-template-columns: 1fr 1fr; /* Dos columnas */
+gap: 10px 20px; /* Filas x Columnas */
+margin-top: 20px;
+}
+
+/* Cada atributo en un bloque */
+.detalle-item {
+display: flex;
+flex-direction: column;
+background-color: #f9f9f9;
+padding: 10px;
+border-radius: 4px;
+}
+
+.detalle-label {
+font-weight: bold;
+color: var(--color-secundario);
+margin-bottom: 3px;
+}
+.detalle-value {
+color: var(--color-texto);
+}
+
+/* Imagen */
+.detalle-imagen img {
+max-width: 100%;
+border-radius: 5px;
+margin-top: 5px;
+}
+
+/* Responsive: 1 columna en pantallas pequeñas */
+@media (max-width: 600px) {
+.detalle-producto-grid {
+  grid-template-columns: 1fr;
+}
 }
