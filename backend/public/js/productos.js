@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           <div class="detalle-producto-datos">
             <p><strong>Línea:</strong> ${producto.line}</p>
-            <p><strong>Código:</strong> ${producto.codigo}</p>
+            <p><strong>Código:</strong> ${producto.code}</p>
             <p><strong>Descripción:</strong> ${producto.description}</p>
             <p><strong>Lado:</strong> ${producto.side}</p>
             <p><strong>Marca:</strong> ${producto.brand}</p>
