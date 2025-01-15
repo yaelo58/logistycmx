@@ -17,52 +17,25 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const producto = await respuesta.json();
 
-      // Rellenamos el recuadro con TODOS los atributos usando una estructura tipo "grid"
+      // Rellenamos el recuadro con TODOS los atributos y un estilo más agradable
       detalleProductoInfo.innerHTML = `
-        <h3>Detalles del Producto</h3>
-        <div class="detalle-producto-grid">
-          <div class="detalle-item">
-            <span class="detalle-label">Line:</span>
-            <span class="detalle-value">${producto.line}</span>
-          </div>
-          <div class="detalle-item">
-            <span class="detalle-label">Code:</span>
-            <span class="detalle-value">${producto.code}</span>
-          </div>
-          <div class="detalle-item">
-            <span class="detalle-label">Description:</span>
-            <span class="detalle-value">${producto.description}</span>
-          </div>
-          <div class="detalle-item">
-            <span class="detalle-label">Side:</span>
-            <span class="detalle-value">${producto.side}</span>
-          </div>
-          <div class="detalle-item">
-            <span class="detalle-label">Brand:</span>
-            <span class="detalle-value">${producto.brand}</span>
-          </div>
-          <div class="detalle-item">
-            <span class="detalle-label">Model:</span>
-            <span class="detalle-value">${producto.model}</span>
-          </div>
-          <div class="detalle-item">
-            <span class="detalle-label">Year:</span>
-            <span class="detalle-value">${producto.year}</span>
-          </div>
-          <div class="detalle-item">
-            <span class="detalle-label">Price:</span>
-            <span class="detalle-value">$${producto.price.toFixed(2)}</span>
-          </div>
-          <div class="detalle-item">
-            <span class="detalle-label">Stock:</span>
-            <span class="detalle-value">${producto.stock}</span>
-          </div>
-          <div class="detalle-item detalle-imagen">
-            <span class="detalle-label">Image:</span>
-            <img
-              src="${producto.image}"
+        <div class="detalle-producto-info-content">
+          <div class="detalle-producto-image">
+            <img 
+              src="${producto.image}" 
               alt="${producto.code}"
             >
+          </div>
+          <div class="detalle-producto-datos">
+            <p><strong>Line:</strong> ${producto.line}</p>
+            <p><strong>Code:</strong> ${producto.code}</p>
+            <p><strong>Description:</strong> ${producto.description}</p>
+            <p><strong>Side:</strong> ${producto.side}</p>
+            <p><strong>Brand:</strong> ${producto.brand}</p>
+            <p><strong>Model:</strong> ${producto.model}</p>
+            <p><strong>Year:</strong> ${producto.year}</p>
+            <p><strong>Price:</strong> $${producto.price.toFixed(2)}</p>
+            <p><strong>Stock:</strong> ${producto.stock}</p>
           </div>
         </div>
       `;
@@ -90,11 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Contenido de cada celda
     celdaImagen.innerHTML = `
-      <img
-        src="${image}"
-        alt="${code}"
-        style="max-width: 100px; border-radius: 5px;"
-      >
+      <img src="${image}" alt="${code}" 
+           style="max-width: 100px; border-radius: 5px;">
     `;
     celdaCode.textContent = code;
     celdaDescription.textContent = description;
