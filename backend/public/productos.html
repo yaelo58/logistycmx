@@ -25,7 +25,6 @@
 </head>
 <body>
   <header>
-    <!-- (Header igual que antes) -->
     <div class="container">
       <a href="index.html" class="logo">
         <img src="img/logo.png" alt="Logo Logistycmx">
@@ -36,7 +35,7 @@
       <nav id="primary-navigation" class="navigation">
         <ul class="menu">
           <li><a href="index.html#inicio" class="nav-link">Inicio</a></li>
-          <li><a href="products.html" class="nav-link active">Productos</a></li>
+          <li><a href="productos.html" class="nav-link active">Productos</a></li>
           <li><a href="index.html#nosotros" class="nav-link">Nosotros</a></li>
           <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
         </ul>
@@ -56,22 +55,23 @@
           <!-- Mensaje de carga -->
           <p id="loading-message">Cargando productos...</p>
 
-          <!-- Tabla con nuevos encabezados (solo 5 columnas + detalles) -->
+          <!-- Tabla con los nuevos encabezados -->
           <table id="tabla-productos" class="tabla-productos">
             <thead>
               <tr>
-                <th>Imagen</th>
-                <th>Código</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Existencia</th>
-                <th>Detalles</th>
+                <th>Image</th>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Details</th>
               </tr>
             </thead>
             <tbody id="tabla-productos-body">
               <!-- Filas dinámicas de productos -->
             </tbody>
           </table>
+
         </div>
         
         <div class="productos-button">
@@ -84,7 +84,6 @@
   </main>
 
   <footer>
-    <!-- (Footer igual que antes) -->
     <div class="container">
       <p>&copy; 2025 Logistycmx. Todos los derechos reservados.</p>
       <div class="social-media">
@@ -98,6 +97,6 @@
 
   <!-- JavaScript -->
   <script src="js/scripts.js" defer></script>
-  <script src="js/products.js" defer></script>
+  <script src="js/productos.js" defer></script>
 </body>
 </html>
