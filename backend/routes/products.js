@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
+const Product = require('../models/product');
 const { body, validationResult, param } = require('express-validator');
 
 // Middleware de validación para crear o actualizar un producto
