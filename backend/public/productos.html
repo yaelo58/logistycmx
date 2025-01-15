@@ -71,9 +71,20 @@
               <!-- Filas dinámicas de productos -->
             </tbody>
           </table>
-
         </div>
         
+        <!-- Recuadro (modal) para ver detalles de un producto -->
+        <div id="detalle-producto" class="detalle-producto oculto">
+          <div class="detalle-producto-contenido">
+            <!-- Botón para cerrar -->
+            <button id="cerrar-detalle" class="btn btn-primary">
+              Cerrar
+            </button>
+            <!-- Aquí se inyectarán los detalles completos del producto -->
+            <div id="detalle-producto-info"></div>
+          </div>
+        </div>
+
         <div class="productos-button">
           <a href="index.html#contacto" class="btn btn-primary">
             Contáctanos para más información

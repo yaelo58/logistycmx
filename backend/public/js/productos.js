@@ -2,7 +2,53 @@ document.addEventListener("DOMContentLoaded", () => {
   const tablaProductosBody = document.getElementById('tabla-productos-body');
   const loadingMessage = document.getElementById('loading-message');
 
-  // Crear fila de producto con los campos que sí vamos a mostrar en la tabla
+  // Elementos del recuadro (modal)
+  const detalleProductoModal = document.getElementById('detalle-producto');
+  const detalleProductoInfo = document.getElementById('detalle-producto-info');
+  const cerrarDetalleBtn = document.getElementById('cerrar-detalle');
+
+  // Función para mostrar el recuadro con detalles de un producto
+  const mostrarDetallesProducto = async (idProducto) => {
+    try {
+      // Llamada a la API para obtener los datos completos
+      const respuesta = await fetch(`/api/productos/${idProducto}`);
+      if (!respuesta.ok) {
+        throw new Error(`Error al obtener producto: ${respuesta.statusText}`);
+      }
+      const producto = await respuesta.json();
+
+      // Rellenamos el recuadro con TODOS los atributos
+      detalleProductoInfo.innerHTML = `
+        <h3>Detalles del Producto</h3>
+        <p><strong>Line:</strong> ${producto.line}</p>
+        <p><strong>Code:</strong> ${producto.code}</p>
+        <p><strong>Description:</strong> ${producto.description}</p>
+        <p><strong>Side:</strong> ${producto.side}</p>
+        <p><strong>Brand:</strong> ${producto.brand}</p>
+        <p><strong>Model:</strong> ${producto.model}</p>
+        <p><strong>Year:</strong> ${producto.year}</p>
+        <p><strong>Price:</strong> $${producto.price.toFixed(2)}</p>
+        <p><strong>Stock:</strong> ${producto.stock}</p>
+        <p>
+          <strong>Image:</strong>
+          <img 
+            src="${producto.image}" 
+            alt="${producto.code}" 
+            style="max-width: 200px; display: block; margin-top: 5px;"
+          >
+        </p>
+      `;
+
+      // Quitamos la clase "oculto" para mostrar el modal
+      detalleProductoModal.classList.remove('oculto');
+
+    } catch (error) {
+      console.error('Error al mostrar detalles:', error);
+      alert('No se pudieron cargar los detalles de este producto.');
+    }
+  };
+
+  // Crear fila de producto con los campos que se muestran en la tabla
   const crearFilaProducto = ({ _id, code, description, price, stock, image }) => {
     const fila = document.createElement('tr');
 
@@ -15,28 +61,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const celdaDetalles = document.createElement('td');
 
     // Contenido de cada celda
-
-    // Imagen
-    celdaImagen.innerHTML = `<img src="${image}" alt="${code}" style="max-width: 100px; border-radius: 5px;">`;
-
-    // Code
+    celdaImagen.innerHTML = `
+      <img src="${image}" alt="${code}" 
+           style="max-width: 100px; border-radius: 5px;">
+    `;
     celdaCode.textContent = code;
-
-    // Description
     celdaDescription.textContent = description;
-
-    // Price (con decimales fijos)
     celdaPrice.textContent = `$${price.toFixed(2)}`;
-
-    // Stock
     celdaStock.textContent = stock;
 
-    // Agregar un botón o enlace para más detalles
-    const enlaceDetalle = document.createElement('a');
-    enlaceDetalle.href = `detalle-producto.html?id=${_id}`;
-    enlaceDetalle.classList.add('btn');
-    enlaceDetalle.textContent = 'Ver Más';
-    celdaDetalles.appendChild(enlaceDetalle);
+    // Botón para ver detalles
+    const botonDetalle = document.createElement('button');
+    botonDetalle.classList.add('btn');
+    botonDetalle.textContent = 'Ver Detalles';
+    // Evento para mostrar detalles en el recuadro
+    botonDetalle.addEventListener('click', () => {
+      mostrarDetallesProducto(_id);
+    });
+
+    // Agregar el botón a la celda
+    celdaDetalles.appendChild(botonDetalle);
 
     // Agregar las celdas a la fila
     fila.appendChild(celdaImagen);
@@ -76,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Crear una fila por cada producto
       productos.forEach(producto => {
-        // Omitimos line, side, brand, model, year en la tabla
         const filaProducto = crearFilaProducto(producto);
         tablaProductosBody.appendChild(filaProducto);
       });
@@ -87,6 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(error);
     }
   };
+
+  // Cerrar el recuadro de detalles al hacer clic en el botón "Cerrar"
+  cerrarDetalleBtn.addEventListener('click', () => {
+    detalleProductoModal.classList.add('oculto');
+  });
 
   // Ejecutar la carga de productos al cargar la página
   cargarProductos();
