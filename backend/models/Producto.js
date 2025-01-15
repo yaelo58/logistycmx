@@ -13,7 +13,6 @@ const ProductoSchema = new mongoose.Schema(
       type: String,
       required: [true, 'El código es obligatorio'],
       trim: true,
-      unique: true,
     },
     description: {
       type: String,
