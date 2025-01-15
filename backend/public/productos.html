@@ -1,3 +1,4 @@
+<!-- backend/public/productos.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -49,9 +50,39 @@
       <div class="container">
         <h2 class="section-title">Nuestros Productos</h2>
         
+        <!-- Filtros -->
+        <div id="filtros-container" class="filtros-container">
+          <div class="filtro">
+            <label for="filtro-line">Línea:</label>
+            <select id="filtro-line">
+              <option value="">-- Todas --</option>
+            </select>
+          </div>
+
+          <div class="filtro">
+            <label for="filtro-brand">Marca:</label>
+            <select id="filtro-brand">
+              <option value="">-- Todas --</option>
+            </select>
+          </div>
+
+          <div class="filtro">
+            <label for="filtro-model">Modelo:</label>
+            <select id="filtro-model">
+              <option value="">-- Todos --</option>
+            </select>
+          </div>
+
+          <div class="filtro">
+            <label for="filtro-year">Año:</label>
+            <select id="filtro-year">
+              <option value="">-- Todos --</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Contenedor para la tabla de productos -->
         <div id="productos-container" class="productos-container">
-          
           <!-- Mensaje de carga -->
           <p id="loading-message">Cargando productos...</p>
 
@@ -76,7 +107,7 @@
         <!-- Recuadro (modal) para ver detalles de un producto -->
         <div id="detalle-producto" class="detalle-producto oculto">
           <div class="detalle-producto-contenido">
-            <!-- Botón para cerrar (cambiamos a ícono en la esquina) -->
+            <!-- Botón para cerrar (ícono en la esquina) -->
             <button id="cerrar-detalle" class="btn btn-primary">
               <i class="fas fa-times"></i>
             </button>

@@ -1,7 +1,8 @@
+// backend/routes/productos.js
 const express = require('express');
 const router = express.Router();
 const Producto = require('../models/Producto');
-const { body, validationResult, param } = require('express-validator');
+const { body, validationResult, param, query } = require('express-validator');
 
 // Middleware de validación para crear o actualizar un producto
 const validarProducto = [
@@ -44,16 +45,14 @@ const validarProducto = [
     .withMessage('La imagen debe ser una URL válida'),
 ];
 
+// ---------------------
+// Rutas existentes
+// ---------------------
+
 // GET /api/productos - Obtener todos los productos
-// Aquí puedes decidir si ocultas algunos campos en la respuesta JSON.
-// Por ejemplo, si NO quieres mostrar line, side, brand, model, year, usa .select().
 router.get('/', async (req, res) => {
   try {
-    // Si deseas mostrar todos los campos en la respuesta JSON, quita .select().
-    // O excluye campos que no quieres enviar al front, por ejemplo:
-    // const productos = await Producto.find().select('-line -side -brand -model -year');
     const productos = await Producto.find();
-
     res.json(productos);
   } catch (error) {
     console.error(error);
@@ -98,6 +97,66 @@ router.post('/', validarProducto, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: 'Error al crear el producto' });
+  }
+});
+
+// ---------------------
+// NUEVAS RUTAS DE FILTROS
+// ---------------------
+
+/**
+ * GET /api/productos/filters
+ * Obtiene los valores distintos de line, brand, model, year
+ * de manera dinámica según los query params que se envíen.
+ * Ejemplo de uso:
+ *   /api/productos/filters?line=FRENOS&brand=TOYOTA
+ *   Esto devolverá las 'model' y 'year' que correspondan a esa line y brand
+ */
+router.get('/filters', async (req, res) => {
+  try {
+    const { line, brand, model, year } = req.query;
+
+    // Construir objeto de búsqueda
+    const filtro = {};
+    if (line) filtro.line = line;
+    if (brand) filtro.brand = brand;
+    if (model) filtro.model = model;
+    if (year) filtro.year = Number(year);
+
+    // Hacemos distinct de cada campo pero aplicando el filtro
+    const [lines, brands, models, years] = await Promise.all([
+      Producto.distinct('line', filtro),
+      Producto.distinct('brand', filtro),
+      Producto.distinct('model', filtro),
+      Producto.distinct('year', filtro),
+    ]);
+
+    res.json({ lines, brands, models, years });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al obtener filtros' });
+  }
+});
+
+/**
+ * GET /api/productos/filter
+ * Obtiene los productos filtrados según los parámetros que se envíen:
+ *   ?line=...&brand=...&model=...&year=...
+ */
+router.get('/filter', async (req, res) => {
+  try {
+    const { line, brand, model, year } = req.query;
+    const filtro = {};
+    if (line) filtro.line = line;
+    if (brand) filtro.brand = brand;
+    if (model) filtro.model = model;
+    if (year) filtro.year = Number(year);
+
+    const productosFiltrados = await Producto.find(filtro);
+    res.json(productosFiltrados);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al filtrar productos' });
   }
 });
 
