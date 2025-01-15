@@ -1,4 +1,5 @@
 // backend/routes/productos.js
+
 const express = require('express');
 const router = express.Router();
 const Producto = require('../models/Producto');
@@ -10,7 +11,7 @@ const validarProducto = [
     .trim()
     .notEmpty()
     .withMessage('La línea es requerida'),
-  body('code')
+  body('codigo') // <-- Cambiado de 'code' a 'codigo'
     .trim()
     .notEmpty()
     .withMessage('El código es requerido'),
@@ -156,6 +157,9 @@ router.post('/', validarProducto, async (req, res) => {
     res.status(201).json(productoGuardado);
   } catch (error) {
     console.error(error);
+    if (error.code === 11000 && error.keyValue && error.keyValue.codigo) { // Manejo específico para duplicados en 'codigo'
+      return res.status(400).json({ mensaje: 'El código ya existe.' });
+    }
     res.status(500).json({ mensaje: 'Error al crear el producto' });
   }
 });

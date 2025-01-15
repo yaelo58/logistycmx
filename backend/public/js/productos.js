@@ -1,4 +1,5 @@
 // backend/public/js/productos.js
+
 document.addEventListener("DOMContentLoaded", () => {
   const tablaProductosBody = document.getElementById('tabla-productos-body');
   const loadingMessage = document.getElementById('loading-message');
@@ -42,17 +43,17 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Crea la fila de la tabla para un producto
-  const crearFilaProducto = ({ _id, code, description, price, stock, image }) => {
+  const crearFilaProducto = ({ _id, codigo, description, price, stock, image }) => { // <-- Cambiado de 'code' a 'codigo'
     const fila = document.createElement('tr');
     const celdaImagen = document.createElement('td');
-    const celdaCode = document.createElement('td');
+    const celdaCodigo = document.createElement('td'); // <-- Cambiado de 'celdaCode'
     const celdaDescription = document.createElement('td');
     const celdaPrice = document.createElement('td');
     const celdaStock = document.createElement('td');
     const celdaDetalles = document.createElement('td');
 
-    celdaImagen.innerHTML = `<img src="${image}" alt="${code}" style="max-width: 100px; border-radius: 5px;">`;
-    celdaCode.textContent = code;
+    celdaImagen.innerHTML = `<img src="${image}" alt="${codigo}" style="max-width: 100px; border-radius: 5px;">`; // <-- Cambiado de 'code' a 'codigo'
+    celdaCodigo.textContent = codigo; // <-- Cambiado de 'code' a 'codigo'
     celdaDescription.textContent = description;
     celdaPrice.textContent = `$${price.toFixed(2)}`;
     celdaStock.textContent = stock;
@@ -67,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     celdaDetalles.appendChild(botonDetalle);
     fila.appendChild(celdaImagen);
-    fila.appendChild(celdaCode);
+    fila.appendChild(celdaCodigo); // <-- Cambiado de 'celdaCode'
     fila.appendChild(celdaDescription);
     fila.appendChild(celdaPrice);
     fila.appendChild(celdaStock);
@@ -208,11 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
       detalleProductoInfo.innerHTML = `
         <div class="detalle-producto-info-content">
           <div class="detalle-producto-image">
-            <img src="${producto.image}" alt="${producto.code}">
+            <img src="${producto.image}" alt="${producto.codigo}">
           </div>
           <div class="detalle-producto-datos">
             <p><strong>Línea:</strong> ${producto.line}</p>
-            <p><strong>Código:</strong> ${producto.code}</p>
+            <p><strong>Código:</strong> ${producto.codigo}</p>
             <p><strong>Descripción:</strong> ${producto.description}</p>
             <p><strong>Lado:</strong> ${producto.side}</p>
             <p><strong>Marca:</strong> ${producto.brand}</p>
