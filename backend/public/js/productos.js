@@ -27,15 +27,15 @@ document.addEventListener("DOMContentLoaded", () => {
             >
           </div>
           <div class="detalle-producto-datos">
-            <p><strong>Line:</strong> ${producto.line}</p>
-            <p><strong>Code:</strong> ${producto.code}</p>
-            <p><strong>Description:</strong> ${producto.description}</p>
-            <p><strong>Side:</strong> ${producto.side}</p>
-            <p><strong>Brand:</strong> ${producto.brand}</p>
-            <p><strong>Model:</strong> ${producto.model}</p>
-            <p><strong>Year:</strong> ${producto.year}</p>
-            <p><strong>Price:</strong> $${producto.price.toFixed(2)}</p>
-            <p><strong>Stock:</strong> ${producto.stock}</p>
+            <p><strong>Linea:</strong> ${producto.line}</p>
+            <p><strong>Código:</strong> ${producto.code}</p>
+            <p><strong>Descripción:</strong> ${producto.description}</p>
+            <p><strong>Lado:</strong> ${producto.side}</p>
+            <p><strong>Marca:</strong> ${producto.brand}</p>
+            <p><strong>Modelo:</strong> ${producto.model}</p>
+            <p><strong>Año:</strong> ${producto.year}</p>
+            <p><strong>Precio:</strong> $${producto.price.toFixed(2)}</p>
+            <p><strong>Existencia:</strong> ${producto.stock}</p>
           </div>
         </div>
       `;
