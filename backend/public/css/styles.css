@@ -664,6 +664,10 @@ background: #fff;
 padding: 20px;
 width: 90%;
 max-width: 600px;
+/* NUEVO para que no sobresalga de la pantalla */
+max-height: 90vh;
+overflow-y: auto;
+
 border-radius: 8px;
 position: relative;
 }
@@ -683,7 +687,9 @@ align-items: center;    /* Centra horizontalmente */
 }
 
 .detalle-producto-image img {
-max-width: 80%; 
+max-width: 80%;
+/* Ajuste extra para prevenir imágenes muy altas */
+max-height: 300px; 
 margin-bottom: 20px; 
 }
 
