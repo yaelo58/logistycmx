@@ -729,6 +729,10 @@ img {
 
 /* backend/public/css/styles.css */
 
+/******************************************************************************
+  ... (otros estilos existentes)
+******************************************************************************/
+
 /* Estilos para el contenedor de filtros */
 .filtros-container {
   display: flex;
@@ -755,3 +759,19 @@ img {
   border-radius: 5px;
   font-family: 'Roboto', Arial, sans-serif;
 }
+
+/* Responsividad para los filtros */
+@media (max-width: 768px) {
+  .filtros-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filtro {
+    width: 100%;
+  }
+}
+
+/******************************************************************************
+  ... (otros estilos existentes)
+******************************************************************************/
