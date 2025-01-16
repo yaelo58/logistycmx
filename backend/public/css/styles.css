@@ -228,7 +228,7 @@ header .container {
 
 /* ----------- Productos Section ----------- */
 .productos-section {
-  background-color: #f0f0f0;
+  background-color: #f0f0f0; /* Mismo fondo gris claro */
   padding: 60px 20px;
 }
 
@@ -323,7 +323,7 @@ header .container {
 
 /* ----------- Nosotros Section ----------- */
 .nosotros-section {
-  background-color: #e8f4f8;
+  background-color: #f0f0f0; /* Cambiado a fondo gris claro */
   padding: 60px 20px;
 }
 
@@ -491,7 +491,7 @@ header .container {
 
 /* ----------- Contacto Section ----------- */
 .contact-section {
-  background-color: #E5E5E5;
+  background-color: #f0f0f0; /* Cambiado a fondo gris claro */
   padding: 60px 20px;
 }
 
@@ -727,12 +727,6 @@ img {
   color: var(--color-secundario);
 }
 
-/* backend/public/css/styles.css */
-
-/******************************************************************************
-  ... (otros estilos existentes)
-******************************************************************************/
-
 /* Estilos para el contenedor de filtros */
 .filtros-container {
   display: flex;
@@ -771,7 +765,3 @@ img {
     width: 100%;
   }
 }
-
-/******************************************************************************
-  ... (otros estilos existentes)
-******************************************************************************/
