@@ -41,32 +41,21 @@ exports.createProducto = async (req, res, next) => {
   }
 };
 
-// Obtener filtros dinámicos con dependencias secuenciales
+// Obtener filtros dinámicos con lógica de filtros dependientes
 exports.getFilters = async (req, res, next) => {
   try {
-    const { line, brand, model } = req.query;
+    const { line, brand } = req.query; // Solo line y brand para obtener opciones dependientes
 
-    // Validar dependencias
-    if (model && !brand) {
-      return res.status(400).json({ mensaje: 'Para filtrar por modelo, se debe seleccionar una marca primero.' });
-    }
-
-    if (req.query.year && (!brand || !model)) {
-      return res.status(400).json({ mensaje: 'Para filtrar por año, se deben seleccionar marca y modelo primero.' });
-    }
-
-    // Construir el filtro base
     const filtroBase = {
       ...(line && { line }),
       ...(brand && { brand }),
-      ...(model && { model }),
     };
 
-    // Obtener líneas, marcas y modelos distintos
+    // Obtener líneas, marcas, modelos y años distintos basados en los filtros actuales
     const [lines, brands, models, yearStats] = await Promise.all([
       Producto.distinct('line', filtroBase),
-      Producto.distinct('brand', line ? { line } : {}),
-      Producto.distinct('model', brand ? { brand } : {}),
+      Producto.distinct('brand', filtroBase),
+      Producto.distinct('model', { ...filtroBase, ...(brand ? {} : {}) }), // Si brand está seleccionado, filtrar modelos por marca
       Producto.aggregate([
         { $match: filtroBase },
         {
@@ -89,16 +78,10 @@ exports.getFilters = async (req, res, next) => {
   }
 };
 
-// Filtrar productos con dependencias secuenciales
+// Filtrar productos
 exports.filterProductos = async (req, res, next) => {
   try {
     const { line, brand, model, year } = req.query;
-
-    // Validar dependencias
-    if (year && (!brand || !model)) {
-      return res.status(400).json({ mensaje: 'Para filtrar por año, se deben seleccionar marca y modelo primero.' });
-    }
-
     const filtro = {
       ...(line && { line }),
       ...(brand && { brand }),

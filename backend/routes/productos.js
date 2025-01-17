@@ -1,5 +1,4 @@
 // backend/routes/productos.js
-
 const express = require('express');
 const router = express.Router();
 const productosController = require('../controllers/productosController');
@@ -17,58 +16,42 @@ const validarCampos = (req, res, next) => {
 };
 
 // Rutas
-router.get(
-  '/',
-  [
-    // Validar posibles query params para filtros
-    query('line').optional().isString().trim(),
-    query('brand').optional().isString().trim(),
-    query('model').optional().isString().trim(),
-    query('year').optional().isInt({ min: 1900 }),
-    validarCampos
-  ],
-  productosController.getAllProductos
-);
+router.get('/', productosController.getAllProductos);
 
+// Ruta para obtener filtros con validaciones
 router.get(
   '/filters',
   [
-    // Validar posibles query params para filtros
-    query('line').optional().isString().trim(),
-    query('brand').optional().isString().trim(),
-    query('model').optional().isString().trim(),
-    validarCampos
+    query('line').optional().isString().trim().withMessage('La línea debe ser una cadena de texto.'),
+    query('brand').optional().isString().trim().withMessage('La marca debe ser una cadena de texto.'),
   ],
+  validarCampos,
   productosController.getFilters
 );
 
+// Ruta para filtrar productos con validaciones
 router.get(
   '/filter',
   [
-    // Validar posibles query params para filtros
-    query('line').optional().isString().trim(),
-    query('brand').optional().isString().trim(),
-    query('model').optional().isString().trim(),
-    query('year').optional().isInt({ min: 1900 }),
-    validarCampos
+    query('line').optional().isString().trim().withMessage('La línea debe ser una cadena de texto.'),
+    query('brand').optional().isString().trim().withMessage('La marca debe ser una cadena de texto.'),
+    query('model').optional().isString().trim().withMessage('El modelo debe ser una cadena de texto.'),
+    query('year')
+      .optional()
+      .isInt({ min: 1900 })
+      .withMessage('El año debe ser un número entero mayor o igual a 1900.'),
   ],
+  validarCampos,
   productosController.filterProductos
 );
 
 router.get(
   '/:id',
-  [
-    param('id').isMongoId().withMessage('ID de producto inválido'),
-    validarCampos
-  ],
+  param('id').isMongoId().withMessage('ID de producto inválido'),
+  validarCampos,
   productosController.getProductoById
 );
 
-router.post(
-  '/',
-  validarProducto,
-  validarCampos,
-  productosController.createProducto
-);
+router.post('/', validarProducto, validarCampos, productosController.createProducto);
 
 module.exports = router;

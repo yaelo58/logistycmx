@@ -1,3 +1,5 @@
+// backend/models/Producto.js
+
 const mongoose = require('mongoose');
 
 const ProductoSchema = new mongoose.Schema(
@@ -21,7 +23,11 @@ const ProductoSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Índice compuesto para optimizar consultas
+// Índices compuestos para optimizar consultas
 ProductoSchema.index({ line: 1, brand: 1 });
+ProductoSchema.index({ brand: 1, model: 1 });
+ProductoSchema.index({ brand: 1, model: 1, startYear: 1, endYear: 1 });
+ProductoSchema.index({ model: 1 });
+ProductoSchema.index({ startYear: 1, endYear: 1 });
 
 module.exports = mongoose.model('Producto', ProductoSchema);

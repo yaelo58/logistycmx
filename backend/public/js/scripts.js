@@ -1,8 +1,10 @@
+// backend/public/js/scripts.js
+
 document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.querySelector(".menu-toggle");
   const navigation = document.querySelector(".navigation");
   const menuLinks = document.querySelectorAll(".nav-link");
-  const btnLinks = document.querySelectorAll("a.btn[href^='#']");
+  const btnLinks = document.querySelectorAll("a.btn[href^='#']"); // Selecciona enlaces con clase .btn que empiezan con #
   const header = document.querySelector('header');
   const headerHeight = header.offsetHeight;
   const sections = document.querySelectorAll("section");
