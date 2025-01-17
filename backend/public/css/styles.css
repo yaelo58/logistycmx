@@ -1,3 +1,5 @@
+/* backend/public/css/styles.css */
+
 /******************************************************************************
   1. VARIABLES, RESET Y TIPOGRAFÍA
 ******************************************************************************/
@@ -259,368 +261,55 @@ header .container {
 
 .productos-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 40px;
   justify-content: center;
   padding: 20px;
 }
 
-.producto-item {
-  flex: 1 1 300px;
-  max-width: 350px;
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-align: left;
-}
-
-.producto-item:hover {
-  transform: translateY(-15px);
-  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
-}
-
-.producto-item img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin-bottom: 15px;
-}
-
-.producto-item h3 {
-  margin-bottom: 10px;
-  color: var(--color-primario);
-  font-size: 1.5rem;
-}
-
-.producto-item p {
-  color: var(--color-texto);
-  margin-bottom: 15px;
-}
-
-.productos-button {
-  margin-top: 40px;
-}
-
-.btn-primary {
-  background: var(--color-secundario);
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: var(--color-hover);
-  transform: translateY(-2px);
-}
-
-/* Responsivo para Productos */
-@media (max-width: 768px) {
-  .productos-container {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-/* ----------- Nosotros Section ----------- */
-.nosotros-section {
-  background-color: #f0f0f0; /* Cambiado a fondo gris claro */
-  padding: 60px 20px;
-}
-
-.nosotros-section .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.nosotros-container {
+/* Filtros */
+.filtros-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 40px;
-  justify-content: space-between;
-  padding: 20px;
-}
-
-.nosotros-item {
-  flex: 1 1 300px;
-  max-width: 500px;
-  background: #f9f9f9;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.nosotros-item:hover {
-  transform: translateY(-15px);
-  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
-}
-
-.nosotros-item i {
-  font-size: 2rem;
-  color: var(--color-primario);
-  margin-bottom: 15px;
-}
-
-.nosotros-item h3 {
-  margin-bottom: 15px;
-  font-size: 1.8rem;
-  color: var(--color-primario);
-}
-
-.nosotros-item ul {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  text-align: left;
-}
-
-.nosotros-item.valores {
-  flex: 1 1 100%;
-  max-width: 100%;
-}
-
-.vision-list {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  text-align: left;
-}
-
-.vision-list li {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  padding-left: 25px;
-  position: relative;
-  color: var(--color-texto);
-  font-size: 1.1rem;
-}
-
-.vision-list li i {
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: var(--color-primario);
-  margin-top: 5px;
-  font-size: 1.2rem;
-}
-
-.vision-list li:hover {
-  color: var(--color-primario);
-}
-
-.vision-list li:hover i {
-  color: var(--color-hover);
-}
-
-/* Valores */
-.valores-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
   gap: 20px;
+  margin-bottom: 30px;
+  justify-content: flex-start;
 }
 
-.valor {
+.filtro {
   display: flex;
-  align-items: flex-start;
-  background: #fff;
-  padding: 15px;
-  border-radius: 8px;
-  transition: background 0.3s ease;
-  max-width: 350px;
+  flex-direction: column;
+  min-width: 150px;
 }
 
-.valor:hover {
-  background: #f0f0f0;
-}
-
-.valor i {
-  font-size: 1.5rem;
-  color: var(--color-primario);
-  margin-right: 10px;
-  margin-top: 5px;
-}
-
-.valor h4 {
+.filtro label {
   margin-bottom: 5px;
-  font-size: 1.2rem;
-  color: var(--color-secundario);
+  font-weight: 500;
 }
 
-.valor p {
-  font-size: 1rem;
-  color: var(--color-texto);
+.filtro select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: 'Roboto', Arial, sans-serif;
+  transition: border-color 0.3s ease;
 }
 
-/* Responsivo para Nosotros */
-@media (min-width: 768px) {
-  .nosotros-item {
-    flex: 1 1 45%;
-    max-width: 500px;
-  }
-}
-@media (min-width: 992px) {
-  .nosotros-item {
-    flex: 1 1 45%;
-    max-width: 600px;
-  }
-}
-@media (min-width: 1200px) {
-  .nosotros-item {
-    flex: 1 1 40%;
-    max-width: 700px;
-  }
+.filtro select:focus {
+  border-color: var(--color-primario);
 }
 
-@media (max-width: 768px) {
-  .nosotros-container {
-    flex-direction: column;
-    align-items: center;
-  }
-  .valores-list {
-    grid-template-columns: 1fr;
-  }
-  .vision-list li {
-    padding-left: 20px;
-  }
-  .vision-list li i {
-    font-size: 1rem;
-  }
+.filtro select:disabled {
+  background-color: #e9e9e9;
+  cursor: not-allowed;
 }
 
-/* ----------- Contacto Section ----------- */
-.contact-section {
-  background-color: #f0f0f0; /* Cambiado a fondo gris claro */
-  padding: 60px 20px;
+/* Estilo para filtros activos */
+.filtro select.activo {
+  border-color: var(--color-primario);
 }
 
-.contact-section .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.contact-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 40px;
-  justify-content: center;
-}
-
-.contact-item {
-  flex: 1 1 450px;
-  background: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.contact-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-}
-
-.contact-item h3 {
-  color: var(--color-primario);
-  margin-bottom: 20px;
-}
-
-.contact-item address {
-  font-style: normal;
-  margin-bottom: 15px;
-  color: var(--color-texto);
-}
-
-.contact-item a {
-  color: var(--color-primario);
-  text-decoration: none;
-  transition: text-decoration 0.3s ease;
-}
-
-.contact-item a:hover {
-  text-decoration: underline;
-}
-
-iframe {
-  margin-top: 15px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  height: 300px;
-  border: none;
-  transition: transform 0.3s ease;
-}
-
-iframe:hover {
-  transform: scale(1.02);
-}
-
-@media (max-width: 768px) {
-  .contact-item {
-    flex: 1 1 100%;
-  }
-  iframe {
-    height: 200px;
-  }
-}
-
-/******************************************************************************
-4. FOOTER
-******************************************************************************/
-footer {
-  background: var(--color-footer);
-  color: #fff;
-  text-align: center;
-  padding: 20px 0;
-}
-
-footer .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-footer p {
-  font-size: 1rem;
-  margin-bottom: 10px;
-}
-
-footer .social-media a {
-  color: #fff;
-  margin: 0 10px;
-  font-size: 1.2rem;
-  transition: color 0.3s ease;
-}
-
-footer .social-media a:hover {
-  color: var(--color-footer-hover);
-}
-
-/******************************************************************************
-5. UTILS Y CLASES ADICIONALES
-******************************************************************************/
-
-/* Imágenes responsivas */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Mensajes */
-.mensaje-error {
-  color: red;
-  font-weight: bold;
-  text-align: center;
-}
-.mensaje-info {
-  color: #555;
-  font-style: italic;
-  text-align: center;
-}
-
-/* Ejemplo de estilos para la tabla */
+/* Tabla de Productos */
 .tabla-productos {
   width: 100%;
   border-collapse: collapse;
@@ -640,6 +329,24 @@ img {
   font-weight: 700;
 }
 
+.tabla-productos img {
+  max-width: 100px;
+  border-radius: 5px;
+}
+
+/* Mensajes */
+.mensaje-error {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+}
+
+.mensaje-info {
+  color: #555;
+  font-style: italic;
+  text-align: center;
+}
+
 /* --- Recuadro (modal) para detalles del producto --- */
 .detalle-producto {
   position: fixed;
@@ -655,7 +362,6 @@ img {
   opacity: 1;
 }
 
-/* Ocultamos el recuadro cuando no se necesite */
 .oculto {
   display: none !important;
 }
@@ -686,7 +392,7 @@ img {
   }
 }
 
-/* Ajustes para el botón de cerrar (ahora con posición absoluta) */
+/* Botón de cerrar */
 #cerrar-detalle {
   position: absolute;
   top: 15px;
@@ -727,34 +433,7 @@ img {
   color: var(--color-secundario);
 }
 
-/* Estilos para el contenedor de filtros */
-.filtros-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 30px;
-  justify-content: flex-start;
-}
-
-.filtro {
-  display: flex;
-  flex-direction: column;
-  min-width: 150px;
-}
-
-.filtro label {
-  margin-bottom: 5px;
-  font-weight: 500;
-}
-
-.filtro select {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-family: 'Roboto', Arial, sans-serif;
-}
-
-/* Responsividad para los filtros */
+/* Responsividad para la sección de Productos */
 @media (max-width: 768px) {
   .filtros-container {
     flex-direction: column;
@@ -764,28 +443,43 @@ img {
   .filtro {
     width: 100%;
   }
+
+  .tabla-productos img {
+    max-width: 80px;
+  }
 }
 
-/* Estilos para filtros deshabilitados */
-.filtro select:disabled {
-  background-color: #e9ecef;
-  cursor: not-allowed;
+/******************************************************************************
+4. UTILS Y CLASES ADICIONALES
+******************************************************************************/
+
+/* Imágenes responsivas */
+img {
+  max-width: 100%;
+  height: auto;
 }
 
-/* Opcional: agregar estilos para resaltar filtros habilitados */
-.filtro select:enabled {
-  background-color: #fff;
+/* Ejemplo de estilos para la tabla */
+.tabla-productos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
-/* Ajustes para mensajes dentro de la tabla */
-.tabla-productos p.mensaje-error {
-  color: red;
-  font-weight: bold;
+.tabla-productos th,
+.tabla-productos td {
+  border: 1px solid #ddd;
+  padding: 12px;
   text-align: center;
+  vertical-align: middle;
 }
 
-.tabla-productos p.mensaje-info {
-  color: #555;
-  font-style: italic;
-  text-align: center;
+.tabla-productos th {
+  background-color: #f2f2f2;
+  font-weight: 700;
+}
+
+/* Estilo para filtros activos */
+.filtro select.activo {
+  border-color: var(--color-primario);
 }

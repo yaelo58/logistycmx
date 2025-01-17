@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const detalleProductoModal = document.getElementById('detalle-producto');
   const detalleProductoInfo = document.getElementById('detalle-producto-info');
   const cerrarDetalleBtn = document.getElementById('cerrar-detalle');
+  const tablaProductos = document.getElementById('tabla-productos');
 
   // Filtros
   const filtros = {
@@ -19,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // FUNCIONES AUXILIARES
   //---------------------------------------------
 
-  // Obtiene los filtros actuales seleccionados
   const getCurrentFilters = () => {
     return Object.entries(filtros).reduce((acc, [key, element]) => {
       const value = element.value.trim();
@@ -28,12 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }, {});
   };
 
-  // Construye una cadena de consulta a partir de los parámetros
   const buildQueryString = (params) => {
     return new URLSearchParams(params).toString();
   };
 
-  // Crea una fila de producto en la tabla
   const crearFilaProducto = ({ _id, code, description, price, stock, image }) => {
     const fila = document.createElement('tr');
 
@@ -49,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return fila;
   };
 
-  // Muestra un mensaje en la tabla (por ejemplo, sin resultados o error)
   const mostrarMensaje = (mensaje, tipo = 'info') => {
     const mensajeElemento = document.createElement('p');
     mensajeElemento.textContent = mensaje;
@@ -57,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
     tablaProductosBody.appendChild(mensajeElemento);
   };
 
-  // Carga y muestra los productos filtrados
   const cargarProductosFiltrados = async () => {
     const params = getCurrentFilters();
     const queryString = buildQueryString(params);
@@ -65,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       loadingMessage.style.display = 'block';
       tablaProductosBody.innerHTML = '';
+      tablaProductos.classList.add('oculto');
 
       const respuesta = await fetch(`/api/productos/filter?${queryString}`);
       loadingMessage.style.display = 'none';
@@ -84,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fragment.appendChild(fila);
       });
       tablaProductosBody.appendChild(fragment);
+      tablaProductos.classList.remove('oculto');
     } catch (error) {
       loadingMessage.style.display = 'none';
       mostrarMensaje(`Error al filtrar productos: ${error.message}`, 'error');
@@ -91,9 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Carga las opciones de los filtros basándose en los filtros actuales
-  const cargarOpcionesFiltros = async (filtroActual = {}) => {
-    const queryString = buildQueryString(filtroActual);
+  const cargarOpcionesFiltros = async () => {
+    const params = getCurrentFilters();
+    const queryString = buildQueryString(params);
 
     try {
       const respuesta = await fetch(`/api/productos/filters?${queryString}`);
@@ -101,48 +99,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const { lines, brands, models, minYear, maxYear } = await respuesta.json();
 
-      // Llenar el filtro de líneas (si existe)
-      if (lines) {
-        llenarSelect(filtros.line, lines, '-- Todas --');
-      }
+      llenarSelect(filtros.line, lines, '-- Todas --');
+      llenarSelect(filtros.brand, brands, '-- Todas --');
+      llenarSelect(filtros.model, models, '-- Todos --');
+      
+      // Habilitar o deshabilitar el selector de modelo
+      filtros.model.disabled = brands.length === 0;
 
-      // Llenar el filtro de marcas
-      if (brands) {
-        llenarSelect(filtros.brand, brands, '-- Todas --');
-        // Habilitar el filtro de marcas si hay opciones disponibles
-        filtros.brand.disabled = brands.length === 0;
-      }
-
-      // Llenar el filtro de modelos
-      if (models) {
-        llenarSelect(filtros.model, models, '-- Todos --');
-        // Habilitar el filtro de modelos solo si se ha seleccionado una marca
-        filtros.model.disabled = !filtros.brand.value || models.length === 0;
-      } else {
-        filtros.model.innerHTML = `<option value="">-- Todos --</option>`;
-        filtros.model.disabled = true;
-      }
-
-      // Llenar el filtro de años
-      if (minYear && maxYear) {
-        let allYearsArray = [];
+      // Generar el rango completo de años desde minYear hasta maxYear
+      let allYearsArray = [];
+      if (minYear && maxYear && (params.brand || params.line)) { // Dependiendo de las selecciones
         for (let year = minYear; year <= maxYear; year++) {
           allYearsArray.push(year);
         }
-        llenarSelect(filtros.year, allYearsArray, '-- Todos --', true);
-        // Habilitar el filtro de años solo si se han seleccionado marca y modelo
-        filtros.year.disabled = !(filtros.brand.value && filtros.model.value);
-      } else {
-        filtros.year.innerHTML = `<option value="">-- Todos --</option>`;
-        filtros.year.disabled = true;
       }
+
+      llenarSelect(filtros.year, allYearsArray, '-- Todos --', true);
+      
+      // Habilitar o deshabilitar el selector de año
+      filtros.year.disabled = !(params.brand && params.model);
     } catch (error) {
       console.error(error);
       alert(`Error al cargar las opciones de filtros: ${error.message}`);
     }
   };
 
-  // Llena un elemento select con opciones
   const llenarSelect = (selectElement, opciones, defaultText, isNumber = false) => {
     const currentValue = selectElement.value;
     selectElement.innerHTML = `<option value="">${defaultText}</option>`;
@@ -161,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Muestra los detalles de un producto en un modal
   const mostrarDetallesProducto = async (idProducto) => {
     try {
       const respuesta = await fetch(`/api/productos/${idProducto}`);
@@ -193,6 +173,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const actualizarEstilosFiltros = () => {
+    Object.values(filtros).forEach(filtro => {
+      if (filtro.value) {
+        filtro.classList.add('activo');
+      } else {
+        filtro.classList.remove('activo');
+      }
+    });
+  };
+
   //---------------------------------------------
   // EVENTOS
   //---------------------------------------------
@@ -208,70 +198,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Validación de filtros en el frontend
+  const validarFiltros = () => {
+    const { brand, model, year } = getCurrentFilters();
+    if (year && (!brand || !model)) {
+      mostrarMensajeError('Para filtrar por año, se deben seleccionar marca y modelo primero.');
+      return false;
+    }
+    return true;
+  };
+
+  const mostrarMensajeError = (mensaje) => {
+    // Remover mensajes previos
+    const mensajesPrevios = document.querySelectorAll('.mensaje-error');
+    mensajesPrevios.forEach(msg => msg.remove());
+
+    const mensajeError = document.createElement('div');
+    mensajeError.className = 'mensaje-error';
+    mensajeError.textContent = mensaje;
+    document.getElementById('productos-container').prepend(mensajeError);
+
+    // Remover el mensaje después de 5 segundos
+    setTimeout(() => {
+      mensajeError.remove();
+    }, 5000);
+  };
+
   // Eventos para filtros
-  filtros.line.addEventListener('change', async () => {
-    // Al cambiar la línea, reiniciar marca, modelo y año
-    filtros.brand.value = '';
-    filtros.model.innerHTML = `<option value="">-- Todos --</option>`;
-    filtros.model.disabled = true;
-    filtros.year.innerHTML = `<option value="">-- Todos --</option>`;
-    filtros.year.disabled = true;
+  Object.values(filtros).forEach(filtro => {
+    filtro.addEventListener('change', async () => {
+      // Resetear filtros dependientes
+      if (filtro.id === 'filtro-brand') {
+        filtros.model.value = '';
+        filtros.year.value = '';
+      }
+      if (filtro.id === 'filtro-model') {
+        filtros.year.value = '';
+      }
 
-    // Si se selecciona una línea, habilitar y cargar marcas
-    if (filtros.line.value) {
-      await cargarOpcionesFiltros({ line: filtros.line.value });
-    } else {
-      // Si no se selecciona ninguna línea, deshabilitar y resetear filtros dependientes
-      filtros.brand.disabled = true;
-      filtros.model.disabled = true;
-      filtros.year.disabled = true;
-    }
-    await cargarProductosFiltrados();
-  });
+      actualizarEstilosFiltros();
 
-  filtros.brand.addEventListener('change', async () => {
-    // Al cambiar la marca, reiniciar modelo y año
-    filtros.model.value = '';
-    filtros.year.innerHTML = `<option value="">-- Todos --</option>`;
-    filtros.year.disabled = true;
-
-    // Si se selecciona una marca, habilitar y cargar modelos
-    if (filtros.brand.value) {
-      const filtroActual = {
-        ...(filtros.line.value && { line: filtros.line.value }),
-        brand: filtros.brand.value,
-      };
-      await cargarOpcionesFiltros(filtroActual);
-    } else {
-      // Si no se selecciona ninguna marca, deshabilitar y resetear filtros dependientes
-      filtros.model.disabled = true;
-      filtros.year.disabled = true;
-    }
-    await cargarProductosFiltrados();
-  });
-
-  filtros.model.addEventListener('change', async () => {
-    // Al cambiar el modelo, reiniciar año
-    filtros.year.value = '';
-
-    // Si se selecciona un modelo, habilitar y cargar años
-    if (filtros.model.value) {
-      const filtroActual = {
-        ...(filtros.line.value && { line: filtros.line.value }),
-        ...(filtros.brand.value && { brand: filtros.brand.value }),
-        model: filtros.model.value,
-      };
-      await cargarOpcionesFiltros(filtroActual);
-    } else {
-      // Si no se selecciona ningún modelo, deshabilitar y resetear filtro de año
-      filtros.year.disabled = true;
-    }
-    await cargarProductosFiltrados();
-  });
-
-  filtros.year.addEventListener('change', async () => {
-    // No hay filtros dependientes posteriores
-    await cargarProductosFiltrados();
+      if (validarFiltros()) {
+        await cargarOpcionesFiltros();
+        await cargarProductosFiltrados();
+      }
+    });
   });
 
   //---------------------------------------------
