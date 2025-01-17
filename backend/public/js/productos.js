@@ -1,4 +1,3 @@
-// backend/public/js/productos.js
 document.addEventListener("DOMContentLoaded", () => {
   const tablaProductosBody = document.getElementById('tabla-productos-body');
   const loadingMessage = document.getElementById('loading-message');
@@ -30,7 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return new URLSearchParams(params).toString();
   };
 
-  const crearFilaProducto = ({ _id, code, description, startYear, endYear, price, stock, image }) => {
+  // **Función Actualizada: No muestra años en la tabla**
+  const crearFilaProducto = ({ _id, code, description, price, stock, image }) => {
     const fila = document.createElement('tr');
 
     fila.innerHTML = `
@@ -39,11 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <td>${description}</td>
       <td>$${price.toFixed(2)}</td>
       <td>${stock}</td>
-      <td>
-        <button class="btn btn-detalle" data-id="${_id}">Ver Detalles</button>
-        <br>
-        <span>Años Activos: ${startYear} - ${endYear}</span>
-      </td>
+      <td><button class="btn btn-detalle" data-id="${_id}">Ver Detalles</button></td>
     `;
 
     return fila;
