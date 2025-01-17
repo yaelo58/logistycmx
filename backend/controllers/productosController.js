@@ -1,3 +1,5 @@
+// backend/controllers/productosController.js
+
 const Producto = require('../models/Producto');
 
 // Obtener todos los productos con paginación opcional
