@@ -7,7 +7,7 @@ exports.getAllProductos = async (req, res, next) => {
   try {
     const productos = await Producto.find()
       .sort({ createdAt: -1 })
-      .lean(); // Utiliza lean para mejorar el rendimiento
+      .lean(); // Mejora el rendimiento al devolver objetos simples
     res.json(productos);
   } catch (error) {
     next(error);
@@ -53,28 +53,41 @@ exports.getFilters = async (req, res, next) => {
       ...(brand && { brand }),
     };
 
-    // Obtener líneas, marcas, modelos y años distintos basados en los filtros actuales
-    const [lines, brands, models, yearStats] = await Promise.all([
-      Producto.distinct('line', filtroBase).lean(),
-      Producto.distinct('brand', filtroBase).lean(),
-      Producto.distinct('model', { ...filtroBase, ...(brand ? { brand } : {}) }).lean(), // Filtrar modelos por marca si está seleccionada
-      Producto.aggregate([
-        { $match: filtroBase },
-        {
-          $group: {
-            _id: null,
-            minStartYear: { $min: "$startYear" },
-            maxEndYear: { $max: "$endYear" },
-          },
+    const agregacion = [
+      { $match: filtroBase },
+      {
+        $facet: {
+          lines: [{ $group: { _id: "$line" } }, { $sort: { _id: 1 } }],
+          brands: [{ $group: { _id: "$brand" } }, { $sort: { _id: 1 } }],
+          models: [
+            { $group: { _id: "$model" } },
+            { $sort: { _id: 1 } },
+          ],
+          yearStats: [
+            {
+              $group: {
+                _id: null,
+                minStartYear: { $min: "$startYear" },
+                maxEndYear: { $max: "$endYear" },
+              },
+            },
+          ],
         },
-      ]),
-    ]);
+      },
+    ];
 
-    // Extraer el año mínimo y máximo
+    const resultado = await Producto.aggregate(agregacion).exec();
+
+    const { lines, brands, models, yearStats } = resultado[0];
+
+    // Extraer valores
+    const linesList = lines.map(item => item._id);
+    const brandsList = brands.map(item => item._id);
+    const modelsList = models.map(item => item._id);
     const minYear = yearStats[0]?.minStartYear || null;
     const maxYear = yearStats[0]?.maxEndYear || null;
 
-    res.json({ lines, brands, models, minYear, maxYear });
+    res.json({ lines: linesList, brands: brandsList, models: modelsList, minYear, maxYear });
   } catch (error) {
     next(error);
   }
@@ -94,31 +107,20 @@ exports.filterProductos = async (req, res, next) => {
       }),
     };
 
-    // Si hay un término de búsqueda, utilizar búsqueda de texto completo
+    // Si hay un término de búsqueda, utilizar búsqueda de texto
     if (search) {
       filtro.$text = { $search: search };
     }
 
-    // Selecciona los campos necesarios para la respuesta
-    const projection = {
-      score: { $meta: "textScore" }, // Para ordenar por relevancia
-      image: 1,
-      code: 1,
-      description: 1,
-      price: 1,
-      stock: 1,
-    };
+    // Opcional: Proyectar la puntuación de texto si se usa búsqueda de texto
+    const projection = search ? { score: { $meta: "textScore" } } : {};
 
-    let query = Producto.find(filtro, projection).sort({ createdAt: -1 }).lean();
+    // Definir opciones de ordenamiento
+    const sortOption = search ? { score: { $meta: "textScore" }, createdAt: -1 } : { createdAt: -1 };
 
-    // Si hay búsqueda, ordenar por relevancia
-    if (search) {
-      query = Producto.find(filtro, projection)
-        .sort({ score: { $meta: "textScore" }, createdAt: -1 })
-        .lean();
-    }
-
-    const productosFiltrados = await query;
+    const productosFiltrados = await Producto.find(filtro, projection)
+      .sort(sortOption)
+      .lean(); // Mejora el rendimiento al devolver objetos simples
 
     res.json(productosFiltrados);
   } catch (error) {

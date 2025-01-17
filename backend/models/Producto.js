@@ -30,7 +30,7 @@ ProductoSchema.index({ brand: 1, model: 1, startYear: 1, endYear: 1 });
 ProductoSchema.index({ model: 1 });
 ProductoSchema.index({ startYear: 1, endYear: 1 });
 
-// **Nuevo Índice de Texto para Búsquedas de Texto Completo**
+// Índice de texto para búsquedas eficientes en 'description' y 'code'
 ProductoSchema.index({ description: 'text', code: 'text' });
 
 module.exports = mongoose.model('Producto', ProductoSchema);
