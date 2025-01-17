@@ -28,10 +28,7 @@ ProductoSchema.index({ brand: 1, model: 1, startYear: 1, endYear: 1 });
 ProductoSchema.index({ model: 1 });
 ProductoSchema.index({ startYear: 1, endYear: 1 });
 
-// **Índice de texto para búsquedas en 'description' y 'code' con idioma español**
-ProductoSchema.index(
-  { description: 'text', code: 'text' },
-  { default_language: 'spanish' }
-);
+// Índice de texto para búsquedas eficientes
+ProductoSchema.index({ description: 'text', code: 'text' });
 
 module.exports = mongoose.model('Producto', ProductoSchema);
