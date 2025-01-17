@@ -1,13 +1,9 @@
-// backend/controllers/productosController.js
-
 const Producto = require('../models/Producto');
 
 // Obtener todos los productos con paginación opcional
 exports.getAllProductos = async (req, res, next) => {
   try {
-    const productos = await Producto.find()
-      .sort({ createdAt: -1 })
-      .lean(); // Mejora el rendimiento al devolver objetos simples
+    const productos = await Producto.find().sort({ createdAt: -1 });
     res.json(productos);
   } catch (error) {
     next(error);
@@ -18,7 +14,7 @@ exports.getAllProductos = async (req, res, next) => {
 exports.getProductoById = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const producto = await Producto.findById(id).lean();
+    const producto = await Producto.findById(id);
     if (!producto) {
       return res.status(404).json({ mensaje: 'Producto no encontrado' });
     }
@@ -53,41 +49,28 @@ exports.getFilters = async (req, res, next) => {
       ...(brand && { brand }),
     };
 
-    const agregacion = [
-      { $match: filtroBase },
-      {
-        $facet: {
-          lines: [{ $group: { _id: "$line" } }, { $sort: { _id: 1 } }],
-          brands: [{ $group: { _id: "$brand" } }, { $sort: { _id: 1 } }],
-          models: [
-            { $group: { _id: "$model" } },
-            { $sort: { _id: 1 } },
-          ],
-          yearStats: [
-            {
-              $group: {
-                _id: null,
-                minStartYear: { $min: "$startYear" },
-                maxEndYear: { $max: "$endYear" },
-              },
-            },
-          ],
+    // Obtener líneas, marcas, modelos y años distintos basados en los filtros actuales
+    const [lines, brands, models, yearStats] = await Promise.all([
+      Producto.distinct('line', filtroBase),
+      Producto.distinct('brand', filtroBase),
+      Producto.distinct('model', { ...filtroBase, ...(brand ? {} : {}) }), // Si brand está seleccionado, filtrar modelos por marca
+      Producto.aggregate([
+        { $match: filtroBase },
+        {
+          $group: {
+            _id: null,
+            minStartYear: { $min: "$startYear" },
+            maxEndYear: { $max: "$endYear" },
+          },
         },
-      },
-    ];
+      ]),
+    ]);
 
-    const resultado = await Producto.aggregate(agregacion).exec();
-
-    const { lines, brands, models, yearStats } = resultado[0];
-
-    // Extraer valores
-    const linesList = lines.map(item => item._id);
-    const brandsList = brands.map(item => item._id);
-    const modelsList = models.map(item => item._id);
+    // Extraer el año mínimo y máximo
     const minYear = yearStats[0]?.minStartYear || null;
     const maxYear = yearStats[0]?.maxEndYear || null;
 
-    res.json({ lines: linesList, brands: brandsList, models: modelsList, minYear, maxYear });
+    res.json({ lines, brands, models, minYear, maxYear });
   } catch (error) {
     next(error);
   }
@@ -107,21 +90,15 @@ exports.filterProductos = async (req, res, next) => {
       }),
     };
 
-    // Si hay un término de búsqueda, utilizar búsqueda de texto
+    // Si hay un término de búsqueda, añadir condiciones para 'description' y 'code'
     if (search) {
-      filtro.$text = { $search: search };
+      filtro.$or = [
+        { description: { $regex: search, $options: 'i' } }, // 'i' para insensible a mayúsculas
+        { code: { $regex: search, $options: 'i' } }
+      ];
     }
 
-    // Opcional: Proyectar la puntuación de texto si se usa búsqueda de texto
-    const projection = search ? { score: { $meta: "textScore" } } : {};
-
-    // Definir opciones de ordenamiento
-    const sortOption = search ? { score: { $meta: "textScore" }, createdAt: -1 } : { createdAt: -1 };
-
-    const productosFiltrados = await Producto.find(filtro, projection)
-      .sort(sortOption)
-      .lean(); // Mejora el rendimiento al devolver objetos simples
-
+    const productosFiltrados = await Producto.find(filtro).sort({ createdAt: -1 });
     res.json(productosFiltrados);
   } catch (error) {
     next(error);
