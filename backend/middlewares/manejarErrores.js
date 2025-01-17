@@ -1,13 +1,6 @@
+// backend/middlewares/manejarErrores.js
 module.exports = (err, req, res, next) => {
-  console.error(err.stack);
-  if (res.headersSent) {
-    return next(err);
-  }
+    console.error(err.stack);
+    res.status(500).json({ mensaje: 'Error interno del servidor.' });
+  };
   
-  // Manejo de errores específicos
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({ mensaje: err.message });
-  }
-
-  res.status(500).json({ mensaje: 'Error interno del servidor.' });
-};

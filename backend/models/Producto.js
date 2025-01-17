@@ -1,3 +1,5 @@
+// backend/models/Producto.js
+
 const mongoose = require('mongoose');
 
 const ProductoSchema = new mongoose.Schema(
@@ -28,7 +30,7 @@ ProductoSchema.index({ brand: 1, model: 1, startYear: 1, endYear: 1 });
 ProductoSchema.index({ model: 1 });
 ProductoSchema.index({ startYear: 1, endYear: 1 });
 
-// Índice de texto para búsquedas eficientes
+// Índice de texto para búsquedas en 'description' y 'code'
 ProductoSchema.index({ description: 'text', code: 'text' });
 
 module.exports = mongoose.model('Producto', ProductoSchema);
