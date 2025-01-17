@@ -1,13 +1,9 @@
-// backend/controllers/productosController.js
-
 const Producto = require('../models/Producto');
 
 // Obtener todos los productos con paginación opcional
 exports.getAllProductos = async (req, res, next) => {
   try {
-    const productos = await Producto.find()
-      .sort({ createdAt: -1 })
-      .lean(); // Uso de .lean() para mejorar el rendimiento
+    const productos = await Producto.find().sort({ createdAt: -1 });
     res.json(productos);
   } catch (error) {
     next(error);
@@ -18,7 +14,7 @@ exports.getAllProductos = async (req, res, next) => {
 exports.getProductoById = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const producto = await Producto.findById(id).lean(); // Uso de .lean()
+    const producto = await Producto.findById(id);
     if (!producto) {
       return res.status(404).json({ mensaje: 'Producto no encontrado' });
     }
@@ -46,7 +42,7 @@ exports.createProducto = async (req, res, next) => {
 // Obtener filtros dinámicos con lógica de filtros dependientes
 exports.getFilters = async (req, res, next) => {
   try {
-    const { line, brand } = req.query;
+    const { line, brand } = req.query; // Solo line y brand para obtener opciones dependientes
 
     const filtroBase = {
       ...(line && { line }),
@@ -55,9 +51,9 @@ exports.getFilters = async (req, res, next) => {
 
     // Obtener líneas, marcas, modelos y años distintos basados en los filtros actuales
     const [lines, brands, models, yearStats] = await Promise.all([
-      Producto.distinct('line', filtroBase).lean(),
-      Producto.distinct('brand', filtroBase).lean(),
-      Producto.distinct('model', { ...filtroBase, ...(brand ? { brand } : {}) }).lean(),
+      Producto.distinct('line', filtroBase),
+      Producto.distinct('brand', filtroBase),
+      Producto.distinct('model', { ...filtroBase, ...(brand ? {} : {}) }), // Si brand está seleccionado, filtrar modelos por marca
       Producto.aggregate([
         { $match: filtroBase },
         {
@@ -84,7 +80,7 @@ exports.getFilters = async (req, res, next) => {
 exports.filterProductos = async (req, res, next) => {
   try {
     const { line, brand, model, year, search } = req.query;
-    let filtro = {
+    const filtro = {
       ...(line && { line }),
       ...(brand && { brand }),
       ...(model && { model }),
@@ -94,15 +90,15 @@ exports.filterProductos = async (req, res, next) => {
       }),
     };
 
-    // Si hay un término de búsqueda, usar $text para una búsqueda eficiente
+    // Si hay un término de búsqueda, añadir condiciones para 'description' y 'code'
     if (search) {
-      filtro.$text = { $search: search };
+      filtro.$or = [
+        { description: { $regex: search, $options: 'i' } }, // 'i' para insensible a mayúsculas
+        { code: { $regex: search, $options: 'i' } }
+      ];
     }
 
-    const productosFiltrados = await Producto.find(filtro, search ? { score: { $meta: "textScore" } } : {})
-      .sort(search ? { score: { $meta: "textScore" }, createdAt: -1 } : { createdAt: -1 })
-      .lean(); // Uso de .lean()
-
+    const productosFiltrados = await Producto.find(filtro).sort({ createdAt: -1 });
     res.json(productosFiltrados);
   } catch (error) {
     next(error);

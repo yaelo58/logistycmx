@@ -1,5 +1,3 @@
-// backend/server.js
-
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -45,16 +43,10 @@ app.use(
 app.use(cors());
 
 // Middleware para parsear JSON
-app.use(express.json({ limit: '10kb' })); // Limita el tamaño de las solicitudes JSON
+app.use(express.json());
 
-// Middleware para parsear URL-encoded data
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-
-// Servir archivos estáticos con cache control mejorado
-app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '1d', // Ajusta según tus necesidades
-  etag: false,
-}));
+// Servir archivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Rutas de la API
 app.use('/api/productos', productosRuta);
