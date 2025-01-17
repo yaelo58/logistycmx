@@ -42,23 +42,36 @@ exports.createProducto = async (req, res, next) => {
 // Obtener filtros dinámicos
 exports.getFilters = async (req, res, next) => {
   try {
-    const { line, brand, model, year } = req.query;
+    const { line, brand, model } = req.query; // Excluir 'year' de los filtros de consulta
     const filtro = {
       ...(line && { line }),
       ...(brand && { brand }),
       ...(model && { model }),
-      // El año se maneja como un rango en filterProductos
+      // 'year' se maneja por separado en filterProductos
     };
 
-    const [lines, brands, models, startYears, endYears] = await Promise.all([
+    // Obtener líneas, marcas y modelos distintos
+    const [lines, brands, models, yearStats] = await Promise.all([
       Producto.distinct('line', filtro),
       Producto.distinct('brand', filtro),
       Producto.distinct('model', filtro),
-      Producto.distinct('startYear', filtro),
-      Producto.distinct('endYear', filtro),
+      Producto.aggregate([
+        { $match: filtro },
+        {
+          $group: {
+            _id: null,
+            minStartYear: { $min: "$startYear" },
+            maxEndYear: { $max: "$endYear" },
+          },
+        },
+      ]),
     ]);
 
-    res.json({ lines, brands, models, startYears, endYears });
+    // Extraer el año mínimo y máximo
+    const minYear = yearStats[0]?.minStartYear || null;
+    const maxYear = yearStats[0]?.maxEndYear || null;
+
+    res.json({ lines, brands, models, minYear, maxYear });
   } catch (error) {
     next(error);
   }

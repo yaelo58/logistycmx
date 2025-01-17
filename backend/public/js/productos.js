@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return new URLSearchParams(params).toString();
   };
 
-  // **Función Actualizada: No muestra años en la tabla**
+  // **Función Actualizada: Genera filas de productos correctamente**
   const crearFilaProducto = ({ _id, code, description, price, stock, image }) => {
     const fila = document.createElement('tr');
 
@@ -93,14 +93,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const respuesta = await fetch(`/api/productos/filters?${queryString}`);
       if (!respuesta.ok) throw new Error(`Error al cargar filtros: ${respuesta.statusText}`);
 
-      const { lines, brands, models, startYears, endYears } = await respuesta.json();
+      const { lines, brands, models, minYear, maxYear } = await respuesta.json();
       llenarSelect(filtros.line, lines, '-- Todas --');
       llenarSelect(filtros.brand, brands, '-- Todas --');
       llenarSelect(filtros.model, models, '-- Todos --');
 
-      // Para el filtro de año, combinamos startYears y endYears y obtenemos un rango completo
-      const allYearsSet = new Set([...startYears, ...endYears]);
-      const allYearsArray = Array.from(allYearsSet).sort((a, b) => a - b);
+      // Generar el rango completo de años desde minYear hasta maxYear
+      let allYearsArray = [];
+      if (minYear && maxYear) {
+        for (let year = minYear; year <= maxYear; year++) {
+          allYearsArray.push(year);
+        }
+      }
+
       llenarSelect(filtros.year, allYearsArray, '-- Todos --', true);
     } catch (error) {
       console.error(error);
