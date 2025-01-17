@@ -784,3 +784,37 @@ img {
 .filtros-container .filtro input[type="text"]::placeholder {
   color: #aaa;
 }
+
+/* Estilos para la paginación */
+.paginacion-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.paginacion-container button {
+  padding: 8px 16px;
+  background-color: var(--color-primario);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.paginacion-container button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.paginacion-container button:hover:not(:disabled) {
+  background-color: var(--color-hover);
+  transform: translateY(-2px);
+}
+
+.paginacion-container span {
+  font-size: 1rem;
+  color: var(--color-secundario);
+}
