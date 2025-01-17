@@ -1,13 +1,16 @@
+// backend/server.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
 const path = require('path');
+const helmet = require('helmet');
+const cors = require('cors');
+const productosRuta = require('./routes/productos');
+const manejarErrores = require('./middlewares/manejarErrores');
 
 const app = express();
 
-// Configuración de Helmet con Content Security Policy (CSP)
+// Middleware de Seguridad
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -37,38 +40,33 @@ app.use(
   })
 );
 
-// Configuración de CORS (ajusta el origin para producción)
-app.use(
-  cors({
-    origin: '*'
-  })
-);
+// Configuración de CORS
+app.use(cors());
 
 // Middleware para parsear JSON
 app.use(express.json());
 
-// Servir archivos estáticos desde la carpeta 'public'
+// Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Rutas de la API
-const productosRuta = require('./routes/productos');
 app.use('/api/productos', productosRuta);
 
-// Manejar rutas no encontradas (404)
-app.use((req, res) => {
+// Manejar rutas no encontradas
+app.use((req, res, next) => {
   res.status(404).json({ mensaje: 'Página no encontrada.' });
 });
 
-// Manejar errores del servidor
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ mensaje: 'Error interno del servidor.' });
-});
+// Middleware de manejo de errores
+app.use(manejarErrores);
 
 // Conectar a MongoDB y arrancar el servidor
 const iniciarServidor = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     console.log('Conectado a MongoDB');
 
     const PORT = process.env.PORT || 3000;

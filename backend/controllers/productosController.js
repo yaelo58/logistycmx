@@ -1,46 +1,55 @@
+// backend/controllers/productosController.js
 const Producto = require('../models/Producto');
 
-// Obtener todos los productos
-exports.getAllProductos = async (req, res) => {
+// Obtener todos los productos con paginación opcional
+exports.getAllProductos = async (req, res, next) => {
   try {
-    const productos = await Producto.find();
+    const productos = await Producto.find().sort({ createdAt: -1 });
     res.json(productos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error al obtener los productos' });
+    next(error);
   }
 };
 
 // Obtener un producto por ID
-exports.getProductoById = async (req, res) => {
+exports.getProductoById = async (req, res, next) => {
   const { id } = req.params;
   try {
     const producto = await Producto.findById(id);
-    if (!producto) return res.status(404).json({ mensaje: 'Producto no encontrado' });
+    if (!producto) {
+      return res.status(404).json({ mensaje: 'Producto no encontrado' });
+    }
     res.json(producto);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error al obtener el producto' });
+    next(error);
   }
 };
 
 // Crear un nuevo producto
-exports.createProducto = async (req, res) => {
+exports.createProducto = async (req, res, next) => {
   try {
     const producto = new Producto(req.body);
     const productoGuardado = await producto.save();
     res.status(201).json(productoGuardado);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error al crear el producto' });
+    // Manejar errores de duplicados
+    if (error.code === 11000) {
+      return res.status(400).json({ mensaje: 'El código del producto ya existe.' });
+    }
+    next(error);
   }
 };
 
 // Obtener filtros dinámicos
-exports.getFilters = async (req, res) => {
+exports.getFilters = async (req, res, next) => {
   try {
     const { line, brand, model, year } = req.query;
-    const filtro = { ...(line && { line }), ...(brand && { brand }), ...(model && { model }), ...(year && { year: Number(year) }) };
+    const filtro = {
+      ...(line && { line }),
+      ...(brand && { brand }),
+      ...(model && { model }),
+      ...(year && { year: Number(year) }),
+    };
 
     const [lines, brands, models, years] = await Promise.all([
       Producto.distinct('line', filtro),
@@ -51,21 +60,24 @@ exports.getFilters = async (req, res) => {
 
     res.json({ lines, brands, models, years });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error al obtener filtros' });
+    next(error);
   }
 };
 
 // Filtrar productos
-exports.filterProductos = async (req, res) => {
+exports.filterProductos = async (req, res, next) => {
   try {
     const { line, brand, model, year } = req.query;
-    const filtro = { ...(line && { line }), ...(brand && { brand }), ...(model && { model }), ...(year && { year: Number(year) }) };
+    const filtro = {
+      ...(line && { line }),
+      ...(brand && { brand }),
+      ...(model && { model }),
+      ...(year && { year: Number(year) }),
+    };
 
-    const productosFiltrados = await Producto.find(filtro);
+    const productosFiltrados = await Producto.find(filtro).sort({ createdAt: -1 });
     res.json(productosFiltrados);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error al filtrar productos' });
+    next(error);
   }
 };

@@ -1,104 +1,70 @@
+// backend/public/js/productos.js
 document.addEventListener("DOMContentLoaded", () => {
   const tablaProductosBody = document.getElementById('tabla-productos-body');
   const loadingMessage = document.getElementById('loading-message');
-  
-  // Elementos del recuadro (modal)
   const detalleProductoModal = document.getElementById('detalle-producto');
   const detalleProductoInfo = document.getElementById('detalle-producto-info');
   const cerrarDetalleBtn = document.getElementById('cerrar-detalle');
 
   // Filtros
-  const filtroLine = document.getElementById('filtro-line');
-  const filtroBrand = document.getElementById('filtro-brand');
-  const filtroModel = document.getElementById('filtro-model');
-  const filtroYear = document.getElementById('filtro-year');
+  const filtros = {
+    line: document.getElementById('filtro-line'),
+    brand: document.getElementById('filtro-brand'),
+    model: document.getElementById('filtro-model'),
+    year: document.getElementById('filtro-year'),
+  };
 
   //---------------------------------------------
   // FUNCIONES AUXILIARES
   //---------------------------------------------
-  // Obtener los valores seleccionados de los filtros (si existen)
+
   const getCurrentFilters = () => {
-    const line = filtroLine.value.trim();
-    const brand = filtroBrand.value.trim();
-    const model = filtroModel.value.trim();
-    const year = filtroYear.value.trim();
-
-    // Solo devolvemos en el objeto aquellos que no estén vacíos
-    const query = {};
-    if (line) query.line = line;
-    if (brand) query.brand = brand;
-    if (model) query.model = model;
-    if (year) query.year = year;
-    return query;
+    return Object.entries(filtros).reduce((acc, [key, element]) => {
+      const value = element.value.trim();
+      if (value) acc[key] = key === 'year' ? Number(value) : value;
+      return acc;
+    }, {});
   };
 
-  // Arma la query string a partir de un objeto (line, brand, etc.)
   const buildQueryString = (params) => {
-    const esc = encodeURIComponent;
-    return Object.keys(params)
-      .map(k => esc(k) + '=' + esc(params[k]))
-      .join('&');
+    return new URLSearchParams(params).toString();
   };
 
-  // Crea la fila de la tabla para un producto
   const crearFilaProducto = ({ _id, code, description, price, stock, image }) => {
     const fila = document.createElement('tr');
-    const celdaImagen = document.createElement('td');
-    const celdaCode = document.createElement('td');
-    const celdaDescription = document.createElement('td');
-    const celdaPrice = document.createElement('td');
-    const celdaStock = document.createElement('td');
-    const celdaDetalles = document.createElement('td');
 
-    celdaImagen.innerHTML = `<img src="${image}" alt="${code}" style="max-width: 100px; border-radius: 5px;">`;
-    celdaCode.textContent = code;
-    celdaDescription.textContent = description;
-    celdaPrice.textContent = `$${price.toFixed(2)}`;
-    celdaStock.textContent = stock;
-
-    // Botón para ver detalles
-    const botonDetalle = document.createElement('button');
-    botonDetalle.classList.add('btn');
-    botonDetalle.textContent = 'Ver Detalles';
-    botonDetalle.addEventListener('click', () => {
-      mostrarDetallesProducto(_id);
-    });
-
-    celdaDetalles.appendChild(botonDetalle);
-    fila.appendChild(celdaImagen);
-    fila.appendChild(celdaCode);
-    fila.appendChild(celdaDescription);
-    fila.appendChild(celdaPrice);
-    fila.appendChild(celdaStock);
-    fila.appendChild(celdaDetalles);
+    fila.innerHTML = `
+      <td><img src="${image}" alt="${code}" style="max-width: 100px; border-radius: 5px;"></td>
+      <td>${code}</td>
+      <td>${description}</td>
+      <td>$${price.toFixed(2)}</td>
+      <td>${stock}</td>
+      <td><button class="btn btn-detalle" data-id="${_id}">Ver Detalles</button></td>
+    `;
 
     return fila;
   };
 
-  // Muestra mensaje (error o info)
   const mostrarMensaje = (mensaje, tipo = 'info') => {
     const mensajeElemento = document.createElement('p');
     mensajeElemento.textContent = mensaje;
-    mensajeElemento.className = (tipo === 'error') ? 'mensaje-error' : 'mensaje-info';
+    mensajeElemento.className = tipo === 'error' ? 'mensaje-error' : 'mensaje-info';
     tablaProductosBody.appendChild(mensajeElemento);
   };
 
-  // Llama a la API para obtener productos según filtros
   const cargarProductosFiltrados = async () => {
-    const params = getCurrentFilters(); // line, brand, model, year
+    const params = getCurrentFilters();
     const queryString = buildQueryString(params);
-    
+
     try {
-      // Mostrar "Cargando..." mientras fetch
       loadingMessage.style.display = 'block';
-      tablaProductosBody.innerHTML = ''; // limpiamos la tabla
+      tablaProductosBody.innerHTML = '';
 
       const respuesta = await fetch(`/api/productos/filter?${queryString}`);
       loadingMessage.style.display = 'none';
 
-      if (!respuesta.ok) {
-        throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
-      }
+      if (!respuesta.ok) throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
+
       const productos = await respuesta.json();
 
       if (productos.length === 0) {
@@ -106,103 +72,61 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      const fragment = document.createDocumentFragment();
       productos.forEach(prod => {
-        const filaProducto = crearFilaProducto(prod);
-        tablaProductosBody.appendChild(filaProducto);
+        const fila = crearFilaProducto(prod);
+        fragment.appendChild(fila);
       });
+      tablaProductosBody.appendChild(fragment);
     } catch (error) {
       loadingMessage.style.display = 'none';
-      mostrarMensaje('Error al filtrar productos: ' + error.message, 'error');
+      mostrarMensaje(`Error al filtrar productos: ${error.message}`, 'error');
       console.error(error);
     }
   };
 
-  // Llama a la API para obtener los valores distinct de line, brand, model, year
-  // basados en los filtros actuales (para que sean mutuamente excluyentes).
   const cargarOpcionesFiltros = async () => {
     const params = getCurrentFilters();
     const queryString = buildQueryString(params);
 
     try {
-      const resp = await fetch(`/api/productos/filters?${queryString}`);
-      if (!resp.ok) {
-        throw new Error(`Error al cargar filtros: ${resp.statusText}`);
-      }
-      const data = await resp.json();
-      const { lines, brands, models, years } = data;
+      const respuesta = await fetch(`/api/productos/filters?${queryString}`);
+      if (!respuesta.ok) throw new Error(`Error al cargar filtros: ${respuesta.statusText}`);
 
-      // line actual
-      const currentLine = filtroLine.value;
-      // brand actual
-      const currentBrand = filtroBrand.value;
-      // model actual
-      const currentModel = filtroModel.value;
-      // year actual
-      const currentYear = filtroYear.value;
-
-      // Llenar <select> de line
-      filtroLine.innerHTML = '<option value="">-- Todas --</option>';
-      lines.forEach(l => {
-        const op = document.createElement('option');
-        op.value = l;
-        op.textContent = l;
-        filtroLine.appendChild(op);
-      });
-      // Restaurar el valor si todavía existe
-      if (lines.includes(currentLine)) {
-        filtroLine.value = currentLine;
-      }
-
-      // Llenar <select> de brand
-      filtroBrand.innerHTML = '<option value="">-- Todas --</option>';
-      brands.forEach(b => {
-        const op = document.createElement('option');
-        op.value = b;
-        op.textContent = b;
-        filtroBrand.appendChild(op);
-      });
-      if (brands.includes(currentBrand)) {
-        filtroBrand.value = currentBrand;
-      }
-
-      // Llenar <select> de model
-      filtroModel.innerHTML = '<option value="">-- Todos --</option>';
-      models.forEach(m => {
-        const op = document.createElement('option');
-        op.value = m;
-        op.textContent = m;
-        filtroModel.appendChild(op);
-      });
-      if (models.includes(currentModel)) {
-        filtroModel.value = currentModel;
-      }
-
-      // Llenar <select> de year
-      filtroYear.innerHTML = '<option value="">-- Todos --</option>';
-      // Ordenar los años para que sean ascendentes
-      years.sort((a, b) => a - b);
-      years.forEach(y => {
-        const op = document.createElement('option');
-        op.value = y;
-        op.textContent = y;
-        filtroYear.appendChild(op);
-      });
-      if (years.includes(Number(currentYear))) {
-        filtroYear.value = currentYear;
-      }
+      const { lines, brands, models, years } = await respuesta.json();
+      llenarSelect(filtros.line, lines, '-- Todas --');
+      llenarSelect(filtros.brand, brands, '-- Todas --');
+      llenarSelect(filtros.model, models, '-- Todos --');
+      llenarSelect(filtros.year, years.sort((a, b) => a - b), '-- Todos --', true);
     } catch (error) {
       console.error(error);
-      alert('Error al cargar las opciones de filtros: ' + error.message);
+      alert(`Error al cargar las opciones de filtros: ${error.message}`);
     }
   };
 
-  // Muestra el recuadro modal con detalles de un producto
+  const llenarSelect = (selectElement, opciones, defaultText, isNumber = false) => {
+    const currentValue = selectElement.value;
+    selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+    opciones.forEach(op => {
+      const option = document.createElement('option');
+      option.value = op;
+      option.textContent = op;
+      selectElement.appendChild(option);
+    });
+    if (isNumber && !isNaN(currentValue) && opciones.includes(Number(currentValue))) {
+      selectElement.value = currentValue;
+    } else if (opciones.includes(currentValue)) {
+      selectElement.value = currentValue;
+    } else {
+      selectElement.value = '';
+    }
+  };
+
   const mostrarDetallesProducto = async (idProducto) => {
     try {
       const respuesta = await fetch(`/api/productos/${idProducto}`);
-      if (!respuesta.ok) {
-        throw new Error(`Error al obtener producto: ${respuesta.statusText}`);
-      }
+      if (!respuesta.ok) throw new Error(`Error al obtener producto: ${respuesta.statusText}`);
+
       const producto = await respuesta.json();
       detalleProductoInfo.innerHTML = `
         <div class="detalle-producto-info-content">
@@ -232,36 +156,31 @@ document.addEventListener("DOMContentLoaded", () => {
   //---------------------------------------------
   // EVENTOS
   //---------------------------------------------
-  // Cuando cierra el modal
   cerrarDetalleBtn.addEventListener('click', () => {
     detalleProductoModal.classList.add('oculto');
   });
 
-  // Cada que cambie un filtro, recargamos las opciones y los productos
-  filtroLine.addEventListener('change', async () => {
-    await cargarOpcionesFiltros();
-    await cargarProductosFiltrados();
+  // Delegación de eventos para botones de detalle
+  tablaProductosBody.addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-detalle')) {
+      const idProducto = e.target.getAttribute('data-id');
+      mostrarDetallesProducto(idProducto);
+    }
   });
-  filtroBrand.addEventListener('change', async () => {
-    await cargarOpcionesFiltros();
-    await cargarProductosFiltrados();
-  });
-  filtroModel.addEventListener('change', async () => {
-    await cargarOpcionesFiltros();
-    await cargarProductosFiltrados();
-  });
-  filtroYear.addEventListener('change', async () => {
-    await cargarOpcionesFiltros();
-    await cargarProductosFiltrados();
+
+  // Eventos para filtros
+  Object.values(filtros).forEach(filtro => {
+    filtro.addEventListener('change', async () => {
+      await cargarOpcionesFiltros();
+      await cargarProductosFiltrados();
+    });
   });
 
   //---------------------------------------------
   // INICIALIZACIÓN
   //---------------------------------------------
   (async function init() {
-    // 1) Cargar opciones de filtros (sin selección previa).
     await cargarOpcionesFiltros();
-    // 2) Cargar productos filtrados (ningún filtro al inicio).
     await cargarProductosFiltrados();
   })();
 });
