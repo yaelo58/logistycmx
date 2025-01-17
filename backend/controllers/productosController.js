@@ -1,9 +1,13 @@
+// backend/controllers/productosController.js
+
 const Producto = require('../models/Producto');
 
 // Obtener todos los productos con paginación opcional
 exports.getAllProductos = async (req, res, next) => {
   try {
-    const productos = await Producto.find().sort({ createdAt: -1 });
+    const productos = await Producto.find()
+      .sort({ createdAt: -1 })
+      .lean(); // Utiliza lean para mejorar el rendimiento
     res.json(productos);
   } catch (error) {
     next(error);
@@ -14,7 +18,7 @@ exports.getAllProductos = async (req, res, next) => {
 exports.getProductoById = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const producto = await Producto.findById(id);
+    const producto = await Producto.findById(id).lean();
     if (!producto) {
       return res.status(404).json({ mensaje: 'Producto no encontrado' });
     }
@@ -51,9 +55,9 @@ exports.getFilters = async (req, res, next) => {
 
     // Obtener líneas, marcas, modelos y años distintos basados en los filtros actuales
     const [lines, brands, models, yearStats] = await Promise.all([
-      Producto.distinct('line', filtroBase),
-      Producto.distinct('brand', filtroBase),
-      Producto.distinct('model', { ...filtroBase, ...(brand ? {} : {}) }), // Si brand está seleccionado, filtrar modelos por marca
+      Producto.distinct('line', filtroBase).lean(),
+      Producto.distinct('brand', filtroBase).lean(),
+      Producto.distinct('model', { ...filtroBase, ...(brand ? { brand } : {}) }).lean(), // Filtrar modelos por marca si está seleccionada
       Producto.aggregate([
         { $match: filtroBase },
         {
@@ -90,15 +94,32 @@ exports.filterProductos = async (req, res, next) => {
       }),
     };
 
-    // Si hay un término de búsqueda, añadir condiciones para 'description' y 'code'
+    // Si hay un término de búsqueda, utilizar búsqueda de texto completo
     if (search) {
-      filtro.$or = [
-        { description: { $regex: search, $options: 'i' } }, // 'i' para insensible a mayúsculas
-        { code: { $regex: search, $options: 'i' } }
-      ];
+      filtro.$text = { $search: search };
     }
 
-    const productosFiltrados = await Producto.find(filtro).sort({ createdAt: -1 });
+    // Selecciona los campos necesarios para la respuesta
+    const projection = {
+      score: { $meta: "textScore" }, // Para ordenar por relevancia
+      image: 1,
+      code: 1,
+      description: 1,
+      price: 1,
+      stock: 1,
+    };
+
+    let query = Producto.find(filtro, projection).sort({ createdAt: -1 }).lean();
+
+    // Si hay búsqueda, ordenar por relevancia
+    if (search) {
+      query = Producto.find(filtro, projection)
+        .sort({ score: { $meta: "textScore" }, createdAt: -1 })
+        .lean();
+    }
+
+    const productosFiltrados = await query;
+
     res.json(productosFiltrados);
   } catch (error) {
     next(error);
