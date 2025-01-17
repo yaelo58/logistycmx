@@ -1,26 +1,18 @@
+// backend/controllers/productosController.js
+
 const Producto = require('../models/Producto');
 
 // Obtener todos los productos con paginación opcional
 exports.getAllProductos = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20 } = req.query; // Parámetros de paginación
+    const { page = 1, limit = 20 } = req.query;
 
     const productos = await Producto.find()
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .select('-__v') // Excluir el campo __v
-      .lean(); // Obtener objetos JavaScript simples
+      .limit(Number(limit));
 
-    const total = await Producto.countDocuments();
-
-    res.json({
-      total,
-      page: Number(page),
-      limit: Number(limit),
-      totalPages: Math.ceil(total / limit),
-      productos,
-    });
+    res.json(productos);
   } catch (error) {
     next(error);
   }
@@ -30,7 +22,7 @@ exports.getAllProductos = async (req, res, next) => {
 exports.getProductoById = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const producto = await Producto.findById(id).select('-__v').lean();
+    const producto = await Producto.findById(id);
     if (!producto) {
       return res.status(404).json({ mensaje: 'Producto no encontrado' });
     }
@@ -55,99 +47,81 @@ exports.createProducto = async (req, res, next) => {
   }
 };
 
-// Obtener filtros dinámicos con lógica de filtros dependientes
+// Obtener filtros dinámicos con lógica de filtros dependientes (Optimizado)
 exports.getFilters = async (req, res, next) => {
   try {
     const { line, brand } = req.query;
 
-    const filtroBase = {};
-    if (line) filtroBase.line = line;
-    if (brand) filtroBase.brand = brand;
+    const filtroBase = {
+      ...(line && { line }),
+      ...(brand && { brand }),
+    };
 
     const aggregationPipeline = [
       { $match: filtroBase },
       {
-        $group: {
-          _id: null,
-          lines: { $addToSet: "$line" },
-          brands: { $addToSet: "$brand" },
-          models: { $addToSet: "$model" },
-          minStartYear: { $min: "$startYear" },
-          maxEndYear: { $max: "$endYear" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          lines: 1,
-          brands: 1,
-          models: 1,
-          minStartYear: 1,
-          maxEndYear: 1,
+        $facet: {
+          lines: [{ $group: { _id: "$line" } }, { $sort: { _id: 1 } }],
+          brands: [{ $group: { _id: "$brand" } }, { $sort: { _id: 1 } }],
+          models: [
+            ...(brand
+              ? [{ $group: { _id: "$model" } }, { $sort: { _id: 1 } }]
+              : [{ $group: { _id: "$model" } }, { $sort: { _id: 1 } }])
+          ],
+          yearStats: [
+            {
+              $group: {
+                _id: null,
+                minStartYear: { $min: "$startYear" },
+                maxEndYear: { $max: "$endYear" },
+              },
+            },
+          ],
         },
       },
     ];
 
     const result = await Producto.aggregate(aggregationPipeline).exec();
 
-    if (result.length === 0) {
-      return res.json({ lines: [], brands: [], models: [], minYear: null, maxYear: null });
-    }
+    const lines = result[0].lines.map(item => item._id);
+    const brands = result[0].brands.map(item => item._id);
+    const models = result[0].models.map(item => item._id);
+    const minYear = result[0].yearStats[0]?.minStartYear || null;
+    const maxYear = result[0].yearStats[0]?.maxEndYear || null;
 
-    const { lines, brands: brandList, models, minStartYear, maxEndYear } = result[0];
-
-    res.json({
-      lines,
-      brands: brandList,
-      models,
-      minYear: minStartYear,
-      maxYear: maxEndYear,
-    });
+    res.json({ lines, brands, models, minYear, maxYear });
   } catch (error) {
     next(error);
   }
 };
 
-// Filtrar productos con búsqueda y paginación
+// Filtrar productos con búsqueda optimizada
 exports.filterProductos = async (req, res, next) => {
   try {
     const { line, brand, model, year, search, page = 1, limit = 20 } = req.query;
+    const filtro = {
+      ...(line && { line }),
+      ...(brand && { brand }),
+      ...(model && { model }),
+      ...(year && { 
+        startYear: { $lte: Number(year) }, 
+        endYear: { $gte: Number(year) } 
+      }),
+    };
 
-    const filtro = {};
-
-    if (line) filtro.line = line;
-    if (brand) filtro.brand = brand;
-    if (model) filtro.model = model;
-    if (year) {
-      filtro.startYear = { $lte: Number(year) };
-      filtro.endYear = { $gte: Number(year) };
-    }
-
+    // Si hay un término de búsqueda, usar $text
+    let sort = { createdAt: -1 };
     if (search) {
-      const regex = new RegExp(search, 'i'); // Compilar una única expresión regular
-      filtro.$or = [
-        { description: regex },
-        { code: regex },
-      ];
+      filtro.$text = { $search: search };
+      sort = { score: { $meta: "textScore" }, createdAt: -1 };
     }
 
-    const [productosFiltrados, total] = await Promise.all([
-      Producto.find(filtro)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(Number(limit))
-        .select('-__v') // Excluir el campo __v
-        .lean(), // Obtener objetos JavaScript simples
-      Producto.countDocuments(filtro),
-    ]);
+    const productosFiltrados = await Producto.find(filtro, search ? { score: { $meta: "textScore" } } : {})
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
 
-    res.json({
-      total,
-      page: Number(page),
-      limit: Number(limit),
-      totalPages: Math.ceil(total / limit),
-      productos: productosFiltrados,
-    });
+    res.json(productosFiltrados);
   } catch (error) {
     next(error);
   }

@@ -28,7 +28,7 @@ router.get(
   productosController.getFilters
 );
 
-// Ruta para filtrar productos con validaciones, incluyendo 'search' y paginación
+// Ruta para filtrar productos con validaciones, incluyendo 'search'
 router.get(
   '/filter',
   [
@@ -45,15 +45,7 @@ router.get(
       .trim()
       .withMessage('El término de búsqueda debe ser una cadena de texto.')
       .isLength({ min: 1 })
-      .withMessage('El término de búsqueda no puede estar vacío.'),
-    query('page')
-      .optional()
-      .isInt({ min: 1 })
-      .withMessage('La página debe ser un número entero mayor o igual a 1.'),
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 100 })
-      .withMessage('El límite debe ser un número entero entre 1 y 100.'),
+      .withMessage('El término de búsqueda no puede estar vacío.')
   ],
   validarCampos,
   productosController.filterProductos
