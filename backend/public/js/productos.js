@@ -69,13 +69,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // Limpia el contenido previo de la tabla
     tablaProductosBody.innerHTML = '';
 
-    // Crea el elemento de mensaje
-    const mensajeElemento = document.createElement('p');
-    mensajeElemento.textContent = mensaje;
-    mensajeElemento.className = tipo === 'error' ? 'mensaje-error' : 'mensaje-info';
+    // Crea una fila para el mensaje
+    const fila = document.createElement('tr');
 
-    // Añade el mensaje al cuerpo de la tabla
-    tablaProductosBody.appendChild(mensajeElemento);
+    // Crea una celda que abarque todas las columnas (6 en este caso)
+    const celda = document.createElement('td');
+    celda.setAttribute('colspan', '6'); // Ajusta el número según las columnas de tu tabla
+    celda.textContent = mensaje;
+    celda.className = tipo === 'error' ? 'mensaje-error' : 'mensaje-info';
+    celda.style.textAlign = 'center'; // Opcional: Centra el texto
+
+    // Añade la celda a la fila
+    fila.appendChild(celda);
+
+    // Añade la fila al cuerpo de la tabla
+    tablaProductosBody.appendChild(fila);
 
     // Oculta la tabla si no hay productos
     document.getElementById('tabla-productos').classList.add('oculto');
@@ -83,6 +91,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Crea los controles de paginación
   const crearControlesPaginacion = () => {
+    // Si ya existen controles de paginación, elimínalos
+    if (pagination.container.parentNode) {
+      pagination.container.parentNode.removeChild(pagination.container);
+    }
+
     pagination.container.className = 'paginacion-container';
     pagination.container.innerHTML = `
       <button id="pagina-anterior" ${pagination.currentPage === 1 ? 'disabled' : ''}>Anterior</button>
