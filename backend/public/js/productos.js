@@ -1,5 +1,3 @@
-// backend/public/js/productos.js
-
 document.addEventListener("DOMContentLoaded", () => {
   const tablaProductosBody = document.getElementById('tabla-productos-body');
   const loadingMessage = document.getElementById('loading-message');

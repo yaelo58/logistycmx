@@ -1,12 +1,26 @@
-// backend/controllers/productosController.js
-
 const Producto = require('../models/Producto');
 
 // Obtener todos los productos con paginación opcional
 exports.getAllProductos = async (req, res, next) => {
   try {
-    const productos = await Producto.find().sort({ createdAt: -1 });
-    res.json(productos);
+    const { page = 1, limit = 20 } = req.query; // Parámetros de paginación
+
+    const productos = await Producto.find()
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .select('-__v')
+      .lean();
+
+    const total = await Producto.countDocuments();
+
+    res.json({
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / limit),
+      productos,
+    });
   } catch (error) {
     next(error);
   }
@@ -16,7 +30,7 @@ exports.getAllProductos = async (req, res, next) => {
 exports.getProductoById = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const producto = await Producto.findById(id);
+    const producto = await Producto.findById(id).select('-__v').lean();
     if (!producto) {
       return res.status(404).json({ mensaje: 'Producto no encontrado' });
     }
@@ -44,64 +58,96 @@ exports.createProducto = async (req, res, next) => {
 // Obtener filtros dinámicos con lógica de filtros dependientes
 exports.getFilters = async (req, res, next) => {
   try {
-    const { line, brand } = req.query; // Solo line y brand para obtener opciones dependientes
+    const { line, brand } = req.query;
 
-    const filtroBase = {
-      ...(line && { line }),
-      ...(brand && { brand }),
-    };
+    const filtroBase = {};
+    if (line) filtroBase.line = line;
+    if (brand) filtroBase.brand = brand;
 
-    // Obtener líneas, marcas, modelos y años distintos basados en los filtros actuales
-    const [lines, brands, models, yearStats] = await Promise.all([
-      Producto.distinct('line', filtroBase),
-      Producto.distinct('brand', filtroBase),
-      Producto.distinct('model', { ...filtroBase, ...(brand ? {} : {}) }), // Si brand está seleccionado, filtrar modelos por marca
-      Producto.aggregate([
-        { $match: filtroBase },
-        {
-          $group: {
-            _id: null,
-            minStartYear: { $min: "$startYear" },
-            maxEndYear: { $max: "$endYear" },
-          },
+    const aggregationPipeline = [
+      { $match: filtroBase },
+      {
+        $group: {
+          _id: null,
+          lines: { $addToSet: "$line" },
+          brands: { $addToSet: "$brand" },
+          models: { $addToSet: "$model" },
+          minStartYear: { $min: "$startYear" },
+          maxEndYear: { $max: "$endYear" },
         },
-      ]),
-    ]);
+      },
+      {
+        $project: {
+          _id: 0,
+          lines: 1,
+          brands: 1,
+          models: 1,
+          minStartYear: 1,
+          maxEndYear: 1,
+        },
+      },
+    ];
 
-    // Extraer el año mínimo y máximo
-    const minYear = yearStats[0]?.minStartYear || null;
-    const maxYear = yearStats[0]?.maxEndYear || null;
+    const result = await Producto.aggregate(aggregationPipeline).exec();
 
-    res.json({ lines, brands, models, minYear, maxYear });
+    if (result.length === 0) {
+      return res.json({ lines: [], brands: [], models: [], minYear: null, maxYear: null });
+    }
+
+    const { lines, brands: brandList, models, minStartYear, maxEndYear } = result[0];
+
+    res.json({
+      lines,
+      brands: brandList,
+      models,
+      minYear: minStartYear,
+      maxYear: maxEndYear,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-// Filtrar productos con búsqueda
+// Filtrar productos con búsqueda y paginación
 exports.filterProductos = async (req, res, next) => {
   try {
-    const { line, brand, model, year, search } = req.query;
-    const filtro = {
-      ...(line && { line }),
-      ...(brand && { brand }),
-      ...(model && { model }),
-      ...(year && { 
-        startYear: { $lte: Number(year) }, 
-        endYear: { $gte: Number(year) } 
-      }),
-    };
+    const { line, brand, model, year, search, page = 1, limit = 20 } = req.query;
 
-    // Si hay un término de búsqueda, añadir condiciones para 'description' y 'code'
+    const filtro = {};
+
+    if (line) filtro.line = line;
+    if (brand) filtro.brand = brand;
+    if (model) filtro.model = model;
+    if (year) {
+      filtro.startYear = { $lte: Number(year) };
+      filtro.endYear = { $gte: Number(year) };
+    }
+
     if (search) {
+      const regex = new RegExp(search, 'i');
       filtro.$or = [
-        { description: { $regex: search, $options: 'i' } }, // 'i' para insensible a mayúsculas
-        { code: { $regex: search, $options: 'i' } }
+        { description: regex },
+        { code: regex },
       ];
     }
 
-    const productosFiltrados = await Producto.find(filtro).sort({ createdAt: -1 });
-    res.json(productosFiltrados);
+    const [productosFiltrados, total] = await Promise.all([
+      Producto.find(filtro)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(Number(limit))
+        .select('-__v')
+        .lean(),
+      Producto.countDocuments(filtro),
+    ]);
+
+    res.json({
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / limit),
+      productos: productosFiltrados,
+    });
   } catch (error) {
     next(error);
   }
