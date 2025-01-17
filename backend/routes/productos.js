@@ -1,4 +1,5 @@
 // backend/routes/productos.js
+
 const express = require('express');
 const router = express.Router();
 const productosController = require('../controllers/productosController');
@@ -29,7 +30,7 @@ router.get(
   productosController.getFilters
 );
 
-// Ruta para filtrar productos con validaciones
+// Ruta para filtrar productos con validaciones, incluyendo 'search'
 router.get(
   '/filter',
   [
@@ -40,6 +41,13 @@ router.get(
       .optional()
       .isInt({ min: 1900 })
       .withMessage('El año debe ser un número entero mayor o igual a 1900.'),
+    query('search')
+      .optional()
+      .isString()
+      .trim()
+      .withMessage('El término de búsqueda debe ser una cadena de texto.')
+      .isLength({ min: 1 })
+      .withMessage('El término de búsqueda no puede estar vacío.')
   ],
   validarCampos,
   productosController.filterProductos

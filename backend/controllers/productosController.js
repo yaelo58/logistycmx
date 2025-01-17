@@ -78,10 +78,10 @@ exports.getFilters = async (req, res, next) => {
   }
 };
 
-// Filtrar productos
+// Filtrar productos con búsqueda
 exports.filterProductos = async (req, res, next) => {
   try {
-    const { line, brand, model, year } = req.query;
+    const { line, brand, model, year, search } = req.query;
     const filtro = {
       ...(line && { line }),
       ...(brand && { brand }),
@@ -91,6 +91,14 @@ exports.filterProductos = async (req, res, next) => {
         endYear: { $gte: Number(year) } 
       }),
     };
+
+    // Si hay un término de búsqueda, añadir condiciones para 'description' y 'code'
+    if (search) {
+      filtro.$or = [
+        { description: { $regex: search, $options: 'i' } }, // 'i' para insensible a mayúsculas
+        { code: { $regex: search, $options: 'i' } }
+      ];
+    }
 
     const productosFiltrados = await Producto.find(filtro).sort({ createdAt: -1 });
     res.json(productosFiltrados);

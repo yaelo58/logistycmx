@@ -1,4 +1,5 @@
 <!-- backend/public/productos.html -->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -78,6 +79,12 @@
               <option value="">-- Todos --</option>
             </select>
           </div>
+
+          <!-- Nuevo Filtro: Buscador -->
+          <div class="filtro">
+            <label for="filtro-search">Buscar:</label>
+            <input type="text" id="filtro-search" placeholder="Código o Descripción">
+          </div>
         </div>
 
         <!-- Contenedor para la tabla de productos -->
@@ -86,7 +93,7 @@
           <p id="loading-message">Cargando productos...</p>
 
           <!-- Tabla con los encabezados -->
-          <table id="tabla-productos" class="tabla-productos">
+          <table id="tabla-productos" class="tabla-productos oculto">
             <thead>
               <tr>
                 <th>Imagen</th>

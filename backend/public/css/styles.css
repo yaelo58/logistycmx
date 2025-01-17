@@ -625,6 +625,7 @@ img {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  
 }
 
 .tabla-productos th,
@@ -770,4 +771,16 @@ img {
 .filtro select:disabled {
   background-color: #e9ecef;
   cursor: not-allowed;
+}
+
+.filtros-container .filtro input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: 'Roboto', Arial, sans-serif;
+  width: 100%;
+}
+
+.filtros-container .filtro input[type="text"]::placeholder {
+  color: #aaa;
 }

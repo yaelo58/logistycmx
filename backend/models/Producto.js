@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const ProductoSchema = new mongoose.Schema(
   {
     line: { type: String, required: true, trim: true, index: true },
-    code: { type: String, required: true, trim: true, unique: true },
-    description: { type: String, required: true, trim: true },
+    code: { type: String, required: true, trim: true, unique: true, index: true },
+    description: { type: String, required: true, trim: true, index: true }, // Añadido índice
     side: { type: String, required: true, trim: true },
     brand: { type: String, required: true, trim: true, index: true },
     model: { type: String, required: true, trim: true, index: true },

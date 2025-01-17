@@ -1,4 +1,3 @@
-// backend/middlewares/validarProducto.js
 const { body } = require('express-validator');
 
 const validarProducto = [
