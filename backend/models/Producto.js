@@ -8,7 +8,8 @@ const ProductoSchema = new mongoose.Schema(
     side: { type: String, required: true, trim: true },
     brand: { type: String, required: true, trim: true, index: true },
     model: { type: String, required: true, trim: true, index: true },
-    year: { type: Number, required: true, min: 1900, index: true },
+    startYear: { type: Number, required: true, min: 1900, index: true },
+    endYear: { type: Number, required: true, min: 1900, index: true },
     price: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, min: 0 },
     image: {
@@ -20,7 +21,7 @@ const ProductoSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Índice compuesto para mejorar rendimiento en consultas frecuentes
+// Índice compuesto para optimizar consultas
 ProductoSchema.index({ line: 1, brand: 1 });
 
 module.exports = mongoose.model('Producto', ProductoSchema);

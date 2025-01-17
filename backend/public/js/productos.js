@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return new URLSearchParams(params).toString();
   };
 
-  const crearFilaProducto = ({ _id, code, description, price, stock, image }) => {
+  const crearFilaProducto = ({ _id, code, description, startYear, endYear, price, stock, image }) => {
     const fila = document.createElement('tr');
 
     fila.innerHTML = `
@@ -39,7 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
       <td>${description}</td>
       <td>$${price.toFixed(2)}</td>
       <td>${stock}</td>
-      <td><button class="btn btn-detalle" data-id="${_id}">Ver Detalles</button></td>
+      <td>
+        <button class="btn btn-detalle" data-id="${_id}">Ver Detalles</button>
+        <br>
+        <span>Años Activos: ${startYear} - ${endYear}</span>
+      </td>
     `;
 
     return fila;
@@ -93,11 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const respuesta = await fetch(`/api/productos/filters?${queryString}`);
       if (!respuesta.ok) throw new Error(`Error al cargar filtros: ${respuesta.statusText}`);
 
-      const { lines, brands, models, years } = await respuesta.json();
+      const { lines, brands, models, startYears, endYears } = await respuesta.json();
       llenarSelect(filtros.line, lines, '-- Todas --');
       llenarSelect(filtros.brand, brands, '-- Todas --');
       llenarSelect(filtros.model, models, '-- Todos --');
-      llenarSelect(filtros.year, years.sort((a, b) => a - b), '-- Todos --', true);
+
+      // Para el filtro de año, combinamos startYears y endYears y obtenemos un rango completo
+      const allYearsSet = new Set([...startYears, ...endYears]);
+      const allYearsArray = Array.from(allYearsSet).sort((a, b) => a - b);
+      llenarSelect(filtros.year, allYearsArray, '-- Todos --', true);
     } catch (error) {
       console.error(error);
       alert(`Error al cargar las opciones de filtros: ${error.message}`);
@@ -140,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <p><strong>Lado:</strong> ${producto.side}</p>
             <p><strong>Marca:</strong> ${producto.brand}</p>
             <p><strong>Modelo:</strong> ${producto.model}</p>
-            <p><strong>Año:</strong> ${producto.year}</p>
+            <p><strong>Años Activos:</strong> ${producto.startYear} - ${producto.endYear}</p>
             <p><strong>Precio:</strong> $${producto.price.toFixed(2)}</p>
             <p><strong>Existencia:</strong> ${producto.stock}</p>
           </div>

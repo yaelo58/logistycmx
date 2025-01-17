@@ -1,4 +1,3 @@
-// backend/controllers/productosController.js
 const Producto = require('../models/Producto');
 
 // Obtener todos los productos con paginación opcional
@@ -48,17 +47,18 @@ exports.getFilters = async (req, res, next) => {
       ...(line && { line }),
       ...(brand && { brand }),
       ...(model && { model }),
-      ...(year && { year: Number(year) }),
+      // El año se maneja como un rango en filterProductos
     };
 
-    const [lines, brands, models, years] = await Promise.all([
+    const [lines, brands, models, startYears, endYears] = await Promise.all([
       Producto.distinct('line', filtro),
       Producto.distinct('brand', filtro),
       Producto.distinct('model', filtro),
-      Producto.distinct('year', filtro),
+      Producto.distinct('startYear', filtro),
+      Producto.distinct('endYear', filtro),
     ]);
 
-    res.json({ lines, brands, models, years });
+    res.json({ lines, brands, models, startYears, endYears });
   } catch (error) {
     next(error);
   }
@@ -72,7 +72,10 @@ exports.filterProductos = async (req, res, next) => {
       ...(line && { line }),
       ...(brand && { brand }),
       ...(model && { model }),
-      ...(year && { year: Number(year) }),
+      ...(year && { 
+        startYear: { $lte: Number(year) }, 
+        endYear: { $gte: Number(year) } 
+      }),
     };
 
     const productosFiltrados = await Producto.find(filtro).sort({ createdAt: -1 });
