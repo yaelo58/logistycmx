@@ -42,31 +42,29 @@ exports.createProducto = async (req, res, next) => {
 // Obtener filtros dinámicos con lógica de filtros dependientes
 exports.getFilters = async (req, res, next) => {
   try {
-    const { line, brand } = req.query; // Solo line y brand para obtener opciones dependientes
+    const { line, brand } = req.query;
 
     const filtroBase = {
       ...(line && { line }),
       ...(brand && { brand }),
     };
 
-    // Obtener líneas, marcas, modelos y años distintos basados en los filtros actuales
     const [lines, brands, models, yearStats] = await Promise.all([
       Producto.distinct('line', filtroBase),
       Producto.distinct('brand', filtroBase),
-      Producto.distinct('model', { ...filtroBase, ...(brand ? {} : {}) }), // Si brand está seleccionado, filtrar modelos por marca
+      Producto.distinct('model', filtroBase),
       Producto.aggregate([
         { $match: filtroBase },
         {
           $group: {
             _id: null,
-            minStartYear: { $min: "$startYear" },
-            maxEndYear: { $max: "$endYear" },
+            minStartYear: { $min: '$startYear' },
+            maxEndYear: { $max: '$endYear' },
           },
         },
       ]),
     ]);
 
-    // Extraer el año mínimo y máximo
     const minYear = yearStats[0]?.minStartYear || null;
     const maxYear = yearStats[0]?.maxEndYear || null;
 
@@ -80,25 +78,50 @@ exports.getFilters = async (req, res, next) => {
 exports.filterProductos = async (req, res, next) => {
   try {
     const { line, brand, model, year, search } = req.query;
-    const filtro = {
-      ...(line && { line }),
-      ...(brand && { brand }),
-      ...(model && { model }),
-      ...(year && { 
-        startYear: { $lte: Number(year) }, 
-        endYear: { $gte: Number(year) } 
-      }),
-    };
+    const filtro = [];
 
-    // Si hay un término de búsqueda, añadir condiciones para 'description' y 'code'
-    if (search) {
-      filtro.$or = [
-        { description: { $regex: search, $options: 'i' } }, // 'i' para insensible a mayúsculas
-        { code: { $regex: search, $options: 'i' } }
-      ];
+    if (line) filtro.push({ equals: { path: 'line', value: line } });
+    if (brand) filtro.push({ equals: { path: 'brand', value: brand } });
+    if (model) filtro.push({ equals: { path: 'model', value: model } });
+    if (year) {
+      filtro.push({
+        range: {
+          path: 'startYear',
+          gte: Number(year),
+        },
+      });
+      filtro.push({
+        range: {
+          path: 'endYear',
+          lte: Number(year),
+        },
+      });
     }
 
-    const productosFiltrados = await Producto.find(filtro).sort({ createdAt: -1 });
+    const searchStage = search
+      ? {
+          text: {
+            query: search,
+            path: ['description', 'code'], // Campos incluidos en el índice de búsqueda Atlas
+            fuzzy: { maxEdits: 2 },
+          },
+        }
+      : null;
+
+    const aggregationPipeline = [
+      {
+        $search: {
+          compound: {
+            filter: filtro,
+            ...(searchStage && { should: [searchStage] }),
+          },
+        },
+      },
+      { $limit: 100 }, // Limitar los resultados
+      { $sort: { createdAt: -1 } },
+    ];
+
+    const productosFiltrados = await Producto.aggregate(aggregationPipeline);
     res.json(productosFiltrados);
   } catch (error) {
     next(error);
