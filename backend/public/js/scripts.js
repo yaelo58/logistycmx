@@ -2,18 +2,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.querySelector(".menu-toggle");
   const navigation = document.querySelector(".navigation");
   const menuLinks = document.querySelectorAll(".nav-link");
+  const btnLinks = document.querySelectorAll("a.btn[href^='#']");
   const header = document.querySelector('header');
   const headerHeight = header.offsetHeight;
   const sections = document.querySelectorAll("section");
 
-  // Alternar menú móvil
+  // Función para alternar el menú móvil
   const toggleMenu = () => {
     navigation.classList.toggle("active");
   };
 
   menuToggle.addEventListener("click", toggleMenu);
 
-  // Resaltar enlace activo
+  // Función para resaltar el enlace activo
   const highlightNav = (entries) => {
     entries.forEach(entry => {
       const id = entry.target.getAttribute('id');
@@ -37,29 +38,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const observer = new IntersectionObserver(highlightNav, observerOptions);
   sections.forEach(section => observer.observe(section));
 
-  // Cerrar menú al hacer clic en un enlace
+  // Función para manejar el click en enlaces de navegación
+  const handleNavLinkClick = (event, link) => {
+    const href = link.getAttribute("href");
+
+    if (href.startsWith("#")) {
+      event.preventDefault();
+      const targetId = href.substring(1);
+      const targetElement = document.getElementById(targetId);
+
+      if (targetElement) {
+        const offsetTop = targetElement.offsetTop - headerHeight;
+        window.scrollTo({
+          top: offsetTop,
+          behavior: "smooth"
+        });
+      }
+    }
+
+    if (navigation.classList.contains("active")) {
+      toggleMenu();
+    }
+  };
+
+  // Añadir eventos a enlaces de navegación
   menuLinks.forEach(link => {
-    link.addEventListener("click", (event) => {
-      const href = link.getAttribute("href");
+    link.addEventListener("click", (event) => handleNavLinkClick(event, link));
+  });
 
-      if (href.startsWith("#")) {
-        event.preventDefault();
-        const targetId = href.substring(1);
-        const targetElement = document.getElementById(targetId);
-
-        if (targetElement) {
-          const offsetTop = targetElement.offsetTop - headerHeight;
-          window.scrollTo({
-            top: offsetTop,
-            behavior: "smooth"
-          });
-        }
-      }
-
-      if (navigation.classList.contains("active")) {
-        toggleMenu();
-      }
-    });
+  // Añadir eventos a botones con clase .btn que son enlaces ancla
+  btnLinks.forEach(link => {
+    link.addEventListener("click", (event) => handleNavLinkClick(event, link));
   });
 
   // Cerrar menú al presionar 'Esc'
