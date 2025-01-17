@@ -4,7 +4,7 @@ const ProductoSchema = new mongoose.Schema(
   {
     line: { type: String, required: true, trim: true, index: true },
     code: { type: String, required: true, trim: true, unique: true, index: true },
-    description: { type: String, required: true, trim: true, index: true }, // Añadido índice
+    description: { type: String, required: true, trim: true, index: true },
     side: { type: String, required: true, trim: true },
     brand: { type: String, required: true, trim: true, index: true },
     model: { type: String, required: true, trim: true, index: true },
@@ -21,11 +21,9 @@ const ProductoSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Índices compuestos para optimizar consultas
-ProductoSchema.index({ line: 1, brand: 1 });
-ProductoSchema.index({ brand: 1, model: 1 });
-ProductoSchema.index({ brand: 1, model: 1, startYear: 1, endYear: 1 });
-ProductoSchema.index({ model: 1 });
+// Índices compuestos para optimización
+ProductoSchema.index({ line: 1, brand: 1, model: 1 });
 ProductoSchema.index({ startYear: 1, endYear: 1 });
+ProductoSchema.index({ description: "text", code: "text" }); // Índice de texto
 
 module.exports = mongoose.model('Producto', ProductoSchema);

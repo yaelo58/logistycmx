@@ -1,63 +1,29 @@
-const express = require('express');
-const router = express.Router();
-const productosController = require('../controllers/productosController');
-const validarProducto = require('../middlewares/validarProducto');
-const manejarErrores = require('../middlewares/manejarErrores');
-const { param, query, validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 
-// Middleware para manejar errores de validación
-const validarCampos = (req, res, next) => {
-  const errores = validationResult(req);
-  if (!errores.isEmpty()) {
-    return res.status(400).json({ errores: errores.array() });
-  }
-  next();
-};
-
-// Rutas
-router.get('/', productosController.getAllProductos);
-
-// Ruta para obtener filtros con validaciones
-router.get(
-  '/filters',
-  [
-    query('line').optional().isString().trim().withMessage('La línea debe ser una cadena de texto.'),
-    query('brand').optional().isString().trim().withMessage('La marca debe ser una cadena de texto.'),
-  ],
-  validarCampos,
-  productosController.getFilters
+const ProductoSchema = new mongoose.Schema(
+  {
+    line: { type: String, required: true, trim: true, index: true },
+    code: { type: String, required: true, trim: true, unique: true, index: true },
+    description: { type: String, required: true, trim: true, index: true },
+    side: { type: String, required: true, trim: true },
+    brand: { type: String, required: true, trim: true, index: true },
+    model: { type: String, required: true, trim: true, index: true },
+    startYear: { type: Number, required: true, min: 1900, index: true },
+    endYear: { type: Number, required: true, min: 1900, index: true },
+    price: { type: Number, required: true, min: 0 },
+    stock: { type: Number, required: true, min: 0 },
+    image: {
+      type: String,
+      required: true,
+      match: [/^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/, 'La imagen debe ser una URL válida'],
+    },
+  },
+  { timestamps: true }
 );
 
-// Ruta para filtrar productos con validaciones, incluyendo 'search'
-router.get(
-  '/filter',
-  [
-    query('line').optional().isString().trim().withMessage('La línea debe ser una cadena de texto.'),
-    query('brand').optional().isString().trim().withMessage('La marca debe ser una cadena de texto.'),
-    query('model').optional().isString().trim().withMessage('El modelo debe ser una cadena de texto.'),
-    query('year')
-      .optional()
-      .isInt({ min: 1900 })
-      .withMessage('El año debe ser un número entero mayor o igual a 1900.'),
-    query('search')
-      .optional()
-      .isString()
-      .trim()
-      .withMessage('El término de búsqueda debe ser una cadena de texto.')
-      .isLength({ min: 1 })
-      .withMessage('El término de búsqueda no puede estar vacío.')
-  ],
-  validarCampos,
-  productosController.filterProductos
-);
+// Índices compuestos para optimización
+ProductoSchema.index({ line: 1, brand: 1, model: 1 });
+ProductoSchema.index({ startYear: 1, endYear: 1 });
+ProductoSchema.index({ description: "text", code: "text" }); // Índice de texto
 
-router.get(
-  '/:id',
-  param('id').isMongoId().withMessage('ID de producto inválido'),
-  validarCampos,
-  productosController.getProductoById
-);
-
-router.post('/', validarProducto, validarCampos, productosController.createProducto);
-
-module.exports = router;
+module.exports = mongoose.model('Producto', ProductoSchema);
