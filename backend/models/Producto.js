@@ -21,11 +21,17 @@ const ProductoSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Índices compuestos para optimizar consultas
-ProductoSchema.index({ line: 1, brand: 1 });
-ProductoSchema.index({ brand: 1, model: 1 });
-ProductoSchema.index({ brand: 1, model: 1, startYear: 1, endYear: 1 });
+// Índices para optimizar consultas de filtrado
+ProductoSchema.index({ line: 1 });
+ProductoSchema.index({ brand: 1 });
 ProductoSchema.index({ model: 1 });
 ProductoSchema.index({ startYear: 1, endYear: 1 });
+ProductoSchema.index({ code: 1 }); // Para búsquedas por código
+
+// Índice compuesto para consultas que filtran por línea, marca y modelo
+ProductoSchema.index({ line: 1, brand: 1, model: 1 });
+
+// Índice compuesto para consultas que incluyen año
+ProductoSchema.index({ brand: 1, model: 1, startYear: 1, endYear: 1 });
 
 module.exports = mongoose.model('Producto', ProductoSchema);

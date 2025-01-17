@@ -14,6 +14,14 @@ document.addEventListener("DOMContentLoaded", () => {
     search: document.getElementById('filtro-search') // Buscador añadido
   };
 
+  // Paginación
+  const pagination = {
+    currentPage: 1,
+    totalPages: 1,
+    limit: 20,
+    container: document.createElement('div'),
+  };
+
   //---------------------------------------------
   // FUNCIONES AUXILIARES
   //---------------------------------------------
@@ -73,9 +81,38 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('tabla-productos').classList.add('oculto');
   };
 
+  // Crea los controles de paginación
+  const crearControlesPaginacion = () => {
+    pagination.container.className = 'paginacion-container';
+    pagination.container.innerHTML = `
+      <button id="pagina-anterior" ${pagination.currentPage === 1 ? 'disabled' : ''}>Anterior</button>
+      <span>Página ${pagination.currentPage} de ${pagination.totalPages}</span>
+      <button id="pagina-siguiente" ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}>Siguiente</button>
+    `;
+    document.getElementById('productos-container').appendChild(pagination.container);
+
+    document.getElementById('pagina-anterior').addEventListener('click', async () => {
+      if (pagination.currentPage > 1) {
+        pagination.currentPage--;
+        await cargarProductosFiltrados();
+      }
+    });
+
+    document.getElementById('pagina-siguiente').addEventListener('click', async () => {
+      if (pagination.currentPage < pagination.totalPages) {
+        pagination.currentPage++;
+        await cargarProductosFiltrados();
+      }
+    });
+  };
+
   // Carga los productos filtrados desde el backend
   const cargarProductosFiltrados = async () => {
-    const params = getCurrentFilters();
+    const params = {
+      ...getCurrentFilters(),
+      page: pagination.currentPage,
+      limit: pagination.limit,
+    };
     const queryString = buildQueryString(params);
 
     try {
@@ -94,10 +131,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!respuesta.ok) throw new Error(`Error ${respuesta.status}: ${respuesta.statusText}`);
 
-      const productos = await respuesta.json();
+      const { total, page, limit, totalPages, productos } = await respuesta.json();
+
+      pagination.currentPage = page;
+      pagination.totalPages = totalPages;
+      pagination.limit = limit;
 
       if (productos.length === 0) {
         mostrarMensaje('No hay productos con los filtros seleccionados.', 'info');
+        if (pagination.container.parentNode) {
+          pagination.container.parentNode.removeChild(pagination.container);
+        }
         return;
       }
 
@@ -111,6 +155,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Muestra la tabla de productos
       document.getElementById('tabla-productos').classList.remove('oculto');
+
+      // Actualiza o crea los controles de paginación
+      if (pagination.totalPages > 1) {
+        crearControlesPaginacion();
+      } else if (pagination.container.parentNode) {
+        pagination.container.parentNode.removeChild(pagination.container);
+      }
     } catch (error) {
       loadingMessage.style.display = 'none';
       mostrarMensaje(`Error al filtrar productos: ${error.message}`, 'error');
@@ -229,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //---------------------------------------------
   // EVENTOS
   //---------------------------------------------
-  
+
   // Cierra el modal de detalles al hacer clic en el botón de cerrar
   cerrarDetalleBtn.addEventListener('click', () => {
     detalleProductoModal.classList.add('oculto');
@@ -251,6 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
       filtro.addEventListener('input', () => {
         clearTimeout(debounceTimeout);
         debounceTimeout = setTimeout(async () => {
+          pagination.currentPage = 1; // Resetear a la primera página
           await cargarOpcionesFiltros();
           await cargarProductosFiltrados();
         }, 300); // 300ms de retardo
@@ -258,6 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       // Filtros existentes
       filtro.addEventListener('change', async () => {
+        pagination.currentPage = 1; // Resetear a la primera página
         await cargarOpcionesFiltros();
         await cargarProductosFiltrados();
       });
@@ -267,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //---------------------------------------------
   // INICIALIZACIÓN
   //---------------------------------------------
-  
+
   (async function init() {
     await cargarOpcionesFiltros();
     await cargarProductosFiltrados();

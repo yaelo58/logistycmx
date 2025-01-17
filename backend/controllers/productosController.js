@@ -9,8 +9,8 @@ exports.getAllProductos = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit))
-      .select('-__v')
-      .lean();
+      .select('-__v') // Excluir el campo __v
+      .lean(); // Obtener objetos JavaScript simples
 
     const total = await Producto.countDocuments();
 
@@ -124,7 +124,7 @@ exports.filterProductos = async (req, res, next) => {
     }
 
     if (search) {
-      const regex = new RegExp(search, 'i');
+      const regex = new RegExp(search, 'i'); // Compilar una única expresión regular
       filtro.$or = [
         { description: regex },
         { code: regex },
@@ -136,8 +136,8 @@ exports.filterProductos = async (req, res, next) => {
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(Number(limit))
-        .select('-__v')
-        .lean(),
+        .select('-__v') // Excluir el campo __v
+        .lean(), // Obtener objetos JavaScript simples
       Producto.countDocuments(filtro),
     ]);
 
